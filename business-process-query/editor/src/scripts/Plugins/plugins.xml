@@ -86,6 +86,10 @@
 		</plugin>		
 		
 		<!-- End: BPMN2.0 specific plugins -->
+		
+		<!-- Start: query similar activities plugins -->
+		<plugin source="query/query.js" name="ORYX.Plugins.Query"/>
+		<!-- End: query similar activities plugins -->
 	</plugins>
 	
 	<properties>

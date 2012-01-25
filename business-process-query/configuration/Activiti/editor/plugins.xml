@@ -29,6 +29,13 @@
 			<requires namespace="http://b3mn.org/stencilset/bpmn1.1#"/>	
 		</plugin>
 			
+		<!-- Start: query similar activities plugins -->
+		<plugin source="query/query.js" name="ORYX.Plugins.Query">
+			<requires namespace="http://b3mn.org/stencilset/bpmn1.1#" />
+			<requires namespace="http://b3mn.org/stencilset/bpmn2.0#" />
+		</plugin>
+		<!-- End: query similar activities plugins -->
+		
 		<!-- following plugins don't require Ext -->
 		<plugin source="arrangement.js" name="ORYX.Plugins.Arrangement">
 			<notUsesIn namespace="http://b3mn.org/stencilset/xforms#"/>
@@ -75,6 +82,7 @@
 		</plugin>		
 		
 		<!-- End: BPMN2.0 specific plugins -->
+		
 	</plugins>
 	
 	<properties>
@@ -86,5 +94,6 @@
 		<property group="Z-Order" index="6" />
 		<property group="Docker" index="7" />
 		<property group="Zoom" index="8" />	
+		<property group="Query" index="9" />
 	</properties>
 </config>

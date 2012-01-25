@@ -12,7 +12,7 @@
 	</target>
 
 	<target name="com.signavio.configuration.copy.editor" depends="com.signavio.configuration.createVersionFile">
-		<copy file="${configuration}/editor/plugins.xml" tofile="../editor/src/scripts/Plugins/plugins.xml" overwrite="true" />
+		<!--copy file="${configuration}/editor/plugins.xml" tofile="../editor/src/scripts/Plugins/plugins.xml" overwrite="true" /-->
 		<copy file="${configuration}/editor/stencilsets.json" tofile="../editor/data/stencilsets/stencilsets.json" overwrite="true" />
 		<copy file="${configuration}/editor/extensions.json" tofile="../editor/data/stencilsets/extensions/extensions.json" overwrite="true" />
 		<copy file="build/version.js" todir="../editor/src/scripts/Plugins/" overwrite="true" />

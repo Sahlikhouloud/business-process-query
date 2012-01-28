@@ -238,6 +238,7 @@ public class HandlerDirectory extends HashMap<String, HandlerEntry> implements D
 		this.registerHandlersOfPackage("com.signavio.warehouse.model.handler");
 		this.registerHandlersOfPackage("com.signavio.warehouse.revision.handler");
 		this.registerHandlersOfPackage("com.signavio.warehouse.search.handler");
+		this.registerHandlersOfPackage("com.signavio.warehouse.query.handler");
 	}
 
     

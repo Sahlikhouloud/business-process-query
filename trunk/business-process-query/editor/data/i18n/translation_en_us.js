@@ -212,6 +212,10 @@ ORYX.I18N.Query.group = "Query";
 ORYX.I18N.Query.query = "Query";
 ORYX.I18N.Query.queryDesc = "Get partial process recommendation";
 
+ORYX.I18N.Query.dialogDesciption = "Please specify your query";
+ORYX.I18N.Query.pleaseWait = "Your query is processing";
+ORYX.I18N.Query.queryBtn = "Get recommendation";
+
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 
 ORYX.I18N.View.group = "Zoom";

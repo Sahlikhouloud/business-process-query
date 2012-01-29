@@ -216,6 +216,9 @@ ORYX.I18N.Query.dialogDesciption = "Please specify your query";
 ORYX.I18N.Query.pleaseWait = "Your query is processing";
 ORYX.I18N.Query.queryBtn = "Get recommendation";
 
+ORYX.I18N.Query.shareFailure = "There was an exception during sharing a process!";
+ORYX.I18N.Query.syntaxFailure = "Cannot share a process containing syntax error!";
+
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 
 ORYX.I18N.View.group = "Zoom";
@@ -240,6 +243,7 @@ ORYX.I18N.Save.dialogLabelTitle = "Title";
 ORYX.I18N.Save.dialogLabelDesc = "Description";
 ORYX.I18N.Save.dialogLabelType = "Type";
 ORYX.I18N.Save.dialogLabelComment = "Revision comment";
+ORYX.I18N.Save.dialogLabelShareProcess = "Share process";
 
 Ext.MessageBox.buttonText.yes = "Yes";
 Ext.MessageBox.buttonText.no = "No";

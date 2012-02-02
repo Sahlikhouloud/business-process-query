@@ -5,6 +5,9 @@ package com.signavio.warehouse.query.business;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +20,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import com.signavio.warehouse.query.gateway.AB3CCollectionGateway;
+import com.signavio.warehouse.query.gateway.util.BaseGateway;
 
 public class Process {
 
@@ -694,32 +700,32 @@ public class Process {
 
 	public static List<String> getAllProcessID() {
 		List<String> processIDs = new ArrayList<String>();
-		// ResultSet rs = null;
-		// Connection db;
-		//
-		// try {
-		// db = BaseGateway.getConnection();
-		// rs = AB3CCollectionGateway.findAllProcess(db);
-		//
-		// while (rs.next()) {
-		// processIDs.add(rs.getString("processid"));
-		// }
-		//
-		// rs.close();
-		// db.close();
-		// } catch (InstantiationException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (IllegalAccessException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (ClassNotFoundException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+		 ResultSet rs = null;
+		 Connection db;
+		
+		 try {
+			 db = BaseGateway.getConnection();
+			 rs = AB3CCollectionGateway.findAllProcess(db);
+		
+		 while (rs.next()) {
+			 processIDs.add(rs.getString("processid"));
+		 }
+		
+		 rs.close();
+		 db.close();
+		 } catch (InstantiationException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 } catch (IllegalAccessException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 } catch (ClassNotFoundException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 } catch (SQLException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 }
 		return processIDs != null ? processIDs : null;
 	}
 
@@ -961,5 +967,31 @@ public class Process {
 		}
 		
 		return "";
+	}
+	
+	public void persist(){
+		for(Activity activity : this.activities){
+			activity.persist(this.processID);
+		}
+	}
+	
+	public void deleteByProcessID(){
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			AB3CCollectionGateway.deleteProcess(db, this.processID);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -80,8 +80,11 @@ public class QueryHandler extends BasisHandler {
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
 			if (!exception.equals("") && exception != null) {
 				res.getWriter().write(exception);
+			}else{
+				process.printProcess();
+				process.deleteByProcessID();
+				process.persist();
 			}
-			process.printProcess();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

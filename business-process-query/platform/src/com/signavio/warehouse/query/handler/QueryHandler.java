@@ -1,5 +1,6 @@
 package com.signavio.warehouse.query.handler;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletContext;
@@ -14,6 +15,8 @@ import com.signavio.platform.annotations.HandlerConfiguration;
 import com.signavio.platform.handler.BasisHandler;
 import com.signavio.platform.security.business.FsAccessToken;
 import com.signavio.platform.security.business.FsSecureBusinessObject;
+import com.signavio.platform.security.business.FsSecurityManager;
+import com.signavio.warehouse.directory.business.FsDirectory;
 import com.signavio.warehouse.query.business.Process;
 
 @HandlerConfiguration(uri = "/query", rel = "que")
@@ -64,19 +67,37 @@ public class QueryHandler extends BasisHandler {
 			HttpServletRequest req, HttpServletResponse res,
 			FsAccessToken token, T sbo) {
 		System.out.println("QueryHandler... doPut ");
+
 		// Get the parameter list
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
 		try {
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
-			String jsonRep = jParams.getString("json_xml");
+			File fXmlFile = this.openFile(parentId, token, name);
 
 			Process process = new Process(name);
-			System.out.println(process.getProcessID());
-			System.out.println(jsonRep);
+			String exception = process.mapXMLfileIntoModel(fXmlFile);
+			if (!exception.equals("") && exception != null) {
+				res.getWriter().write(exception);
+			}
+			process.printProcess();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
 	}
+
+	private File openFile(String parentId, FsAccessToken token, String name) {
+
+		FsDirectory dir = FsSecurityManager.getInstance().loadObject(
+				FsDirectory.class, parentId, token);
+		String path = dir.getPath() + "/" + name + ".bpmn20.xml";
+
+		return new File(path);
+	}
+
 }

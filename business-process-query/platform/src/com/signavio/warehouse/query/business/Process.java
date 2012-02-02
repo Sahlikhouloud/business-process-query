@@ -3,8 +3,20 @@ package com.signavio.warehouse.query.business;
 //import gateway.AB3CCollectionGateway;
 //import gateway.util.BaseGateway;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class Process {
 
@@ -31,68 +43,68 @@ public class Process {
 
 	public Process(String processID) { // Use JAVA to get source and target
 		this.processID = processID;
-//		ResultSet rs = null;
-//		try {
-//
-//			HashMap<String, String> sourceMap = new HashMap<String, String>();
-//			HashMap<String, String> targetMap = new HashMap<String, String>();
-//
-//			Connection db;
-//			db = BaseGateway.getConnection();
-//
-//			rs = AB3CCollectionGateway.findProcess(db, processID);
-//
-//			while (rs.next()) {
-//				Activity activity = new Activity();
-//				activity.setId(rs.getString("id"));
-//				activity.setType(rs.getString("type"));
-//				activity.setName(rs.getString("name"));
-//				this.addActivity(activity);
-//
-//				if (activity.getType() == ActivityType.sequenceFlow) {
-//					sourceMap.put(activity.getId(), rs.getString("sourceref"));
-//					targetMap.put(activity.getId(), rs.getString("targetref"));
-//				}
-//			}
-//
-//			rs.close();
-//			db.close();
-//
-//			for (int i = 0; i < this.activities.size(); i++) {
-//				Activity activity = this.activities.get(i);
-//				if (activity.getType() == ActivityType.sequenceFlow) {
-//					String sourceID = sourceMap.get(activity.getId());
-//					String targetID = targetMap.get(activity.getId());
-//					for (Activity activity1 : this.activities) {
-//						if (activity1.getId().equals(sourceID)) {
-//							activity.setSource(activity1);
-//						}
-//						if (activity1.getId().equals(targetID)) {
-//							activity.setTarget(activity1);
-//						}
-//
-//						if (activity.getSource() != null
-//								&& activity.getTarget() != null) {
-//							break;
-//						}
-//					}
-//					// this.activities.set(i, activity);
-//				}
-//			}
-//
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (InstantiationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// ResultSet rs = null;
+		// try {
+		//
+		// HashMap<String, String> sourceMap = new HashMap<String, String>();
+		// HashMap<String, String> targetMap = new HashMap<String, String>();
+		//
+		// Connection db;
+		// db = BaseGateway.getConnection();
+		//
+		// rs = AB3CCollectionGateway.findProcess(db, processID);
+		//
+		// while (rs.next()) {
+		// Activity activity = new Activity();
+		// activity.setId(rs.getString("id"));
+		// activity.setType(rs.getString("type"));
+		// activity.setName(rs.getString("name"));
+		// this.addActivity(activity);
+		//
+		// if (activity.getType() == ActivityType.sequenceFlow) {
+		// sourceMap.put(activity.getId(), rs.getString("sourceref"));
+		// targetMap.put(activity.getId(), rs.getString("targetref"));
+		// }
+		// }
+		//
+		// rs.close();
+		// db.close();
+		//
+		// for (int i = 0; i < this.activities.size(); i++) {
+		// Activity activity = this.activities.get(i);
+		// if (activity.getType() == ActivityType.sequenceFlow) {
+		// String sourceID = sourceMap.get(activity.getId());
+		// String targetID = targetMap.get(activity.getId());
+		// for (Activity activity1 : this.activities) {
+		// if (activity1.getId().equals(sourceID)) {
+		// activity.setSource(activity1);
+		// }
+		// if (activity1.getId().equals(targetID)) {
+		// activity.setTarget(activity1);
+		// }
+		//
+		// if (activity.getSource() != null
+		// && activity.getTarget() != null) {
+		// break;
+		// }
+		// }
+		// // this.activities.set(i, activity);
+		// }
+		// }
+		//
+		// } catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (InstantiationException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IllegalAccessException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (ClassNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 	}
 
 	// Domain Logic
@@ -682,32 +694,32 @@ public class Process {
 
 	public static List<String> getAllProcessID() {
 		List<String> processIDs = new ArrayList<String>();
-//		ResultSet rs = null;
-//		Connection db;
-//
-//		try {
-//			db = BaseGateway.getConnection();
-//			rs = AB3CCollectionGateway.findAllProcess(db);
-//
-//			while (rs.next()) {
-//				processIDs.add(rs.getString("processid"));
-//			}
-//
-//			rs.close();
-//			db.close();
-//		} catch (InstantiationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// ResultSet rs = null;
+		// Connection db;
+		//
+		// try {
+		// db = BaseGateway.getConnection();
+		// rs = AB3CCollectionGateway.findAllProcess(db);
+		//
+		// while (rs.next()) {
+		// processIDs.add(rs.getString("processid"));
+		// }
+		//
+		// rs.close();
+		// db.close();
+		// } catch (InstantiationException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IllegalAccessException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (ClassNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		return processIDs != null ? processIDs : null;
 	}
 
@@ -825,45 +837,129 @@ public class Process {
 
 	/* For delete duplicate sequence (linking same pair of activity */
 	public void deleteDuplicateSequence() {
-//		List<String> alreadyCheck = new ArrayList<String>();
-//		Connection db;
-//		try {
-//			db = BaseGateway.getConnection();
-//			for (Activity activity : this.activities) {
-//				if (activity.getType() == ActivityType.sequenceFlow) {
-//					alreadyCheck.add(activity.getId());
-//					for (int i = 0; i < this.activities.size(); i++) {
-//						Activity dupActiviy = this.activities.get(i);
-//						if (dupActiviy.getType() == ActivityType.sequenceFlow
-//								&& dupActiviy.getId() != activity.getId()
-//								&& dupActiviy.getSource().getId() == activity
-//										.getSource().getId()
-//								&& dupActiviy.getTarget().getId() == activity
-//										.getTarget().getId()
-//								&& !alreadyCheck.contains(dupActiviy.getId())) {
-//							// delete dupActiviy
-//							AB3CCollectionGateway.deleteActivity(db,
-//									dupActiviy.getId(), this.processID);
-//							alreadyCheck.add(dupActiviy.getId());
-//						}
-//					}
-//				}
-//			}
-//
-//			db.close();
-//		} catch (InstantiationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		alreadyCheck = null;
+		// List<String> alreadyCheck = new ArrayList<String>();
+		// Connection db;
+		// try {
+		// db = BaseGateway.getConnection();
+		// for (Activity activity : this.activities) {
+		// if (activity.getType() == ActivityType.sequenceFlow) {
+		// alreadyCheck.add(activity.getId());
+		// for (int i = 0; i < this.activities.size(); i++) {
+		// Activity dupActiviy = this.activities.get(i);
+		// if (dupActiviy.getType() == ActivityType.sequenceFlow
+		// && dupActiviy.getId() != activity.getId()
+		// && dupActiviy.getSource().getId() == activity
+		// .getSource().getId()
+		// && dupActiviy.getTarget().getId() == activity
+		// .getTarget().getId()
+		// && !alreadyCheck.contains(dupActiviy.getId())) {
+		// // delete dupActiviy
+		// AB3CCollectionGateway.deleteActivity(db,
+		// dupActiviy.getId(), this.processID);
+		// alreadyCheck.add(dupActiviy.getId());
+		// }
+		// }
+		// }
+		// }
+		//
+		// db.close();
+		// } catch (InstantiationException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IllegalAccessException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (ClassNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// alreadyCheck = null;
+	}
+
+	public String mapXMLfileIntoModel(File fXmlFile) {
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(fXmlFile);
+
+			// normalize text representation
+			doc.getDocumentElement().normalize();
+			System.out.println("Root element :"
+					+ doc.getDocumentElement().getNodeName());
+			// always contain only one process tag
+			NodeList processes = doc.getElementsByTagName("process");
+			Node processXML = processes.item(0);
+			NodeList processDetails = processXML.getChildNodes();
+			for (int i = 0; i < processDetails.getLength(); i++) {
+				Node nActivity = processDetails.item(i);
+				if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
+					Element eActivity = (Element) nActivity;
+					if (ActivityType.contains(eActivity.getNodeName())
+							&& !eActivity.getNodeName().equals(
+									ActivityType.sequenceFlow.toString())) {
+						Activity activity = new Activity();
+						activity.setId(eActivity.getAttribute("id"));
+						activity.setType(eActivity.getNodeName());
+						activity.setName(eActivity.getAttribute("name"));
+						this.addActivity(activity);
+
+						if (activity.getType() == ActivityType.task
+								&& (activity.getName() == null || activity
+										.getName().equals(""))) {
+							return "Cannot share a process containing unnamed task!";
+						}
+					}
+				}
+			}
+
+			// adding source and target ref to each sequence
+			if (processXML.getNodeType() == Node.ELEMENT_NODE) {
+				Element eProcessXML = (Element) processXML;
+				NodeList sequences = eProcessXML
+						.getElementsByTagName("sequenceFlow");
+				System.out.println("length : " + sequences.getLength());
+				for (int i = 0; i < sequences.getLength(); i++) {
+					Node nActivity = sequences.item(i);
+					if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
+						Element eActivity = (Element) nActivity;
+						if (eActivity.getNodeName().equals(
+								ActivityType.sequenceFlow.toString())) {
+							Activity activity = new Activity();
+							activity.setId(eActivity.getAttribute("id"));
+							activity.setType(eActivity.getNodeName());
+							activity.setName(eActivity.getAttribute("name"));
+							for (Activity tActivity : this.activities) {
+								String sourceRef = eActivity
+										.getAttribute("sourceRef");
+								String targetRef = eActivity
+										.getAttribute("targetRef");
+								if (tActivity.getId().equals(sourceRef)) {
+									activity.setSource(tActivity);
+								} else if (tActivity.getId().equals(targetRef)) {
+									activity.setTarget(tActivity);
+								}
+							}
+							this.addActivity(activity);
+						}
+					}
+				}
+			}
+
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return "";
 	}
 }

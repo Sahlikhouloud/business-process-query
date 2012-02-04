@@ -111,6 +111,7 @@ public class QueryHandler extends BasisHandler {
 					 boolean isNewProcess = this.deletePreviousProcess(id);
 					 if(isNewProcess){
 						 process.deleteByProcessID();
+						 process.removeNeighborsService();
 					 }
 				 }
 				process.persist();
@@ -138,7 +139,9 @@ public class QueryHandler extends BasisHandler {
 		boolean isNewProcess = false;
 		String [] ids = id.split(";");
 		if(ids.length>1){
-			Process.deleteByProcessIDStatic(ids[ids.length-1].split("\\.")[0]);
+			String realID = ids[ids.length-1].split("\\.")[0];
+			Process.deleteByProcessIDStatic(realID);
+			Process.removeNeighborsServiceStatic(realID);
 		}else{
 			isNewProcess = true;
 		}

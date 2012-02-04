@@ -22,6 +22,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.signavio.warehouse.query.gateway.AB3CCollectionGateway;
+import com.signavio.warehouse.query.gateway.ServiceNeighborsGateway;
 import com.signavio.warehouse.query.gateway.util.BaseGateway;
 
 public class Process {
@@ -1004,6 +1005,46 @@ public class Process {
 		try {
 			db = BaseGateway.getConnection();
 			AB3CCollectionGateway.deleteProcess(db, processID);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeNeighborsService() {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			ServiceNeighborsGateway.deleteNeighbors(db, this.processID);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void removeNeighborsServiceStatic(String id) {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			ServiceNeighborsGateway.deleteNeighbors(db, id);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

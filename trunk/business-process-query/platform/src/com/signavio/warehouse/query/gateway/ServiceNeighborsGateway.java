@@ -10,8 +10,8 @@ public class ServiceNeighborsGateway {
 			+ "VALUES (?, ?, ?, ?, ?, ?, ?) ";
 
 	public static boolean insertNeighbors(Connection db, String processID,
-			String target, int zone, String from, String to, String pattern, int noOfBranches)
-			throws SQLException, InstantiationException,
+			String target, int zone, String from, String to, String pattern,
+			int noOfBranches) throws SQLException, InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
 		// System.out.println(insertStatement);
 
@@ -49,8 +49,8 @@ public class ServiceNeighborsGateway {
 			throws SQLException, InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
 
-//		System.out.println(findProcessStatement + " with processID : "
-//				+ processID);
+		// System.out.println(findProcessStatement + " with processID : "
+		// + processID);
 
 		PreparedStatement stmt = db.prepareStatement(findProcessStatement);
 		stmt.setString(1, processID);
@@ -61,11 +61,11 @@ public class ServiceNeighborsGateway {
 
 	private static final String findProcessIDStatement = "SELECT distinct processid processid FROM service_neighbors limit ? , ? ";
 
-	public static ResultSet findProcessIDLimitNumber(Connection db, int from, int to)
-			throws SQLException, InstantiationException,
+	public static ResultSet findProcessIDLimitNumber(Connection db, int from,
+			int to) throws SQLException, InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
 
-//		System.out.println(findProcessIDStatement);
+		// System.out.println(findProcessIDStatement);
 
 		PreparedStatement stmt = db.prepareStatement(findProcessIDStatement);
 		stmt.setInt(1, from);
@@ -74,4 +74,20 @@ public class ServiceNeighborsGateway {
 		// stmt.close();
 		return result;
 	}
+
+	private static final String deleteStatement = "DELETE FROM service_neighbors WHERE processid = ? ";
+
+	public static boolean deleteNeighbors(Connection db, String processID)
+			throws SQLException, InstantiationException,
+			IllegalAccessException, ClassNotFoundException {
+
+		System.out.println(deleteStatement + " process : "+ processID);
+
+		PreparedStatement stmt = db.prepareStatement(deleteStatement);
+		stmt.setString(1, processID);
+
+		// stmt.close();
+		return stmt.execute();
+	}
+
 }

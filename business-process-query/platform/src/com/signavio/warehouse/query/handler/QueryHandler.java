@@ -18,6 +18,7 @@ import com.signavio.platform.security.business.FsSecureBusinessObject;
 import com.signavio.platform.security.business.FsSecurityManager;
 import com.signavio.warehouse.directory.business.FsDirectory;
 import com.signavio.warehouse.query.business.Process;
+import com.signavio.warehouse.query.util.IConstant;
 
 @HandlerConfiguration(uri = "/query", rel = "que")
 public class QueryHandler extends BasisHandler {
@@ -57,7 +58,30 @@ public class QueryHandler extends BasisHandler {
 			HttpServletRequest req, HttpServletResponse res,
 			FsAccessToken token, T sbo) {
 		System.out.println("QueryHandler... doPost ");
+		// Get the parameter list
+		JSONObject jParams = (JSONObject) req.getAttribute("params");
+		try {
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
+			String name = jParams.getString("name");
+			
+			File fXmlFile = this.openFile(parentId, token, name);
 
+			Process process = new Process(name);
+			String exception = process.mapXMLfileIntoModel(fXmlFile);
+			if (!exception.equals("") && exception != null) {
+				res.getWriter().write(exception);
+			}else{
+				process.persist();
+				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -67,13 +91,13 @@ public class QueryHandler extends BasisHandler {
 			HttpServletRequest req, HttpServletResponse res,
 			FsAccessToken token, T sbo) {
 		System.out.println("QueryHandler... doPut ");
-
 		// Get the parameter list
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
 		try {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
+			
 			File fXmlFile = this.openFile(parentId, token, name);
 
 			Process process = new Process(name);
@@ -81,9 +105,16 @@ public class QueryHandler extends BasisHandler {
 			if (!exception.equals("") && exception != null) {
 				res.getWriter().write(exception);
 			}else{
-				process.printProcess();
-				process.deleteByProcessID();
+				if(jParams.has("id")) {
+					 String id = jParams.getString("id");
+					 System.out.println("ID : "+id);
+					 boolean isNewProcess = this.deletePreviousProcess(id);
+					 if(isNewProcess){
+						 process.deleteByProcessID();
+					 }
+				 }
 				process.persist();
+				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -101,6 +132,17 @@ public class QueryHandler extends BasisHandler {
 		String path = dir.getPath() + "/" + name + ".bpmn20.xml";
 
 		return new File(path);
+	}
+	
+	private boolean deletePreviousProcess(String id){
+		boolean isNewProcess = false;
+		String [] ids = id.split(";");
+		if(ids.length>1){
+			Process.deleteByProcessIDStatic(ids[ids.length-1].split("\\.")[0]);
+		}else{
+			isNewProcess = true;
+		}
+		return isNewProcess;
 	}
 
 }

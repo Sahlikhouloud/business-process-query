@@ -700,32 +700,32 @@ public class Process {
 
 	public static List<String> getAllProcessID() {
 		List<String> processIDs = new ArrayList<String>();
-		 ResultSet rs = null;
-		 Connection db;
-		
-		 try {
-			 db = BaseGateway.getConnection();
-			 rs = AB3CCollectionGateway.findAllProcess(db);
-		
-		 while (rs.next()) {
-			 processIDs.add(rs.getString("processid"));
-		 }
-		
-		 rs.close();
-		 db.close();
-		 } catch (InstantiationException e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 } catch (IllegalAccessException e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 } catch (ClassNotFoundException e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 } catch (SQLException e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 }
+		ResultSet rs = null;
+		Connection db;
+
+		try {
+			db = BaseGateway.getConnection();
+			rs = AB3CCollectionGateway.findAllProcess(db);
+
+			while (rs.next()) {
+				processIDs.add(rs.getString("processid"));
+			}
+
+			rs.close();
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return processIDs != null ? processIDs : null;
 	}
 
@@ -899,31 +899,35 @@ public class Process {
 			// always contain only one process tag
 			NodeList processes = doc.getElementsByTagName("process");
 			Node processXML = processes.item(0);
-			NodeList processDetails = processXML.getChildNodes();
-			for (int i = 0; i < processDetails.getLength(); i++) {
-				Node nActivity = processDetails.item(i);
-				if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
-					Element eActivity = (Element) nActivity;
-					if (ActivityType.contains(eActivity.getNodeName())
-							&& !eActivity.getNodeName().equals(
-									ActivityType.sequenceFlow.toString())) {
-						Activity activity = new Activity();
-						activity.setId(eActivity.getAttribute("id"));
-						activity.setType(eActivity.getNodeName());
-						activity.setName(eActivity.getAttribute("name"));
-						this.addActivity(activity);
+			if (processXML != null
+					&& processXML.getNodeType() == Node.ELEMENT_NODE) {
+				NodeList processDetails = processXML.getChildNodes();
+				for (int i = 0; i < processDetails.getLength(); i++) {
+					Node nActivity = processDetails.item(i);
+					if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
+						Element eActivity = (Element) nActivity;
+						if (ActivityType.contains(eActivity.getNodeName())
+								&& !eActivity.getNodeName().equals(
+										ActivityType.sequenceFlow.toString())) {
+							Activity activity = new Activity();
+							activity.setId(eActivity.getAttribute("id"));
+							activity.setType(eActivity.getNodeName());
+							activity.setName(eActivity.getAttribute("name"));
+							this.addActivity(activity);
 
-						if (activity.getType() == ActivityType.task
-								&& (activity.getName() == null || activity
-										.getName().equals(""))) {
-							return "Cannot share a process containing unnamed task!";
+							if (activity.getType() == ActivityType.task
+									&& (activity.getName() == null || activity
+											.getName().equals(""))) {
+								return "Cannot share a process containing unnamed task!";
+							}
 						}
 					}
 				}
 			}
 
 			// adding source and target ref to each sequence
-			if (processXML.getNodeType() == Node.ELEMENT_NODE) {
+			if (processXML != null
+					&& processXML.getNodeType() == Node.ELEMENT_NODE) {
 				Element eProcessXML = (Element) processXML;
 				NodeList sequences = eProcessXML
 						.getElementsByTagName("sequenceFlow");
@@ -965,21 +969,41 @@ public class Process {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return "";
 	}
-	
-	public void persist(){
-		for(Activity activity : this.activities){
+
+	public void persist() {
+		for (Activity activity : this.activities) {
 			activity.persist(this.processID);
 		}
 	}
-	
-	public void deleteByProcessID(){
+
+	public void deleteByProcessID() {
 		Connection db;
 		try {
 			db = BaseGateway.getConnection();
 			AB3CCollectionGateway.deleteProcess(db, this.processID);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void deleteByProcessIDStatic(String processID) {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			AB3CCollectionGateway.deleteProcess(db, processID);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

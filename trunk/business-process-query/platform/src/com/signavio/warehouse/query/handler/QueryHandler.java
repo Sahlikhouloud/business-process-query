@@ -36,6 +36,7 @@ public class QueryHandler extends BasisHandler {
 		System.out.println("QueryHandler... doGet ");
 		JSONArray jsons = new JSONArray();
 		JSONObject entry = new JSONObject();
+		JSONObject jParams = (JSONObject) req.getAttribute("params");
 		try {
 			entry.put("token", token);
 		} catch (JSONException e1) {
@@ -61,17 +62,18 @@ public class QueryHandler extends BasisHandler {
 		// Get the parameter list
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
 		try {
+//			System.out.println(jParams.getString("xml");
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
-			
+
 			File fXmlFile = this.openFile(parentId, token, name);
 
 			Process process = new Process(name);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
 			if (!exception.equals("") && exception != null) {
 				res.getWriter().write(exception);
-			}else{
+			} else {
 				process.persist();
 				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
 			}
@@ -97,23 +99,23 @@ public class QueryHandler extends BasisHandler {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
-			
+
 			File fXmlFile = this.openFile(parentId, token, name);
 
 			Process process = new Process(name);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
 			if (!exception.equals("") && exception != null) {
 				res.getWriter().write(exception);
-			}else{
-				if(jParams.has("id")) {
-					 String id = jParams.getString("id");
-					 System.out.println("ID : "+id);
-					 boolean isNewProcess = this.deletePreviousProcess(id);
-					 if(isNewProcess){
-						 process.deleteByProcessID();
-						 process.removeNeighborsService();
-					 }
-				 }
+			} else {
+				if (jParams.has("id")) {
+					String id = jParams.getString("id");
+					System.out.println("ID : " + id);
+					boolean isNewProcess = this.deletePreviousProcess(id);
+					if (isNewProcess) {
+						process.deleteByProcessID();
+						process.removeNeighborsService();
+					}
+				}
 				process.persist();
 				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
 			}
@@ -134,15 +136,15 @@ public class QueryHandler extends BasisHandler {
 
 		return new File(path);
 	}
-	
-	private boolean deletePreviousProcess(String id){
+
+	private boolean deletePreviousProcess(String id) {
 		boolean isNewProcess = false;
-		String [] ids = id.split(";");
-		if(ids.length>1){
-			String realID = ids[ids.length-1].split("\\.")[0];
+		String[] ids = id.split(";");
+		if (ids.length > 1) {
+			String realID = ids[ids.length - 1].split("\\.")[0];
 			Process.deleteByProcessIDStatic(realID);
 			Process.removeNeighborsServiceStatic(realID);
-		}else{
+		} else {
 			isNewProcess = true;
 		}
 		return isNewProcess;

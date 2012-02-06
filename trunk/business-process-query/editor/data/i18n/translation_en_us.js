@@ -214,6 +214,10 @@ ORYX.I18N.Query.queryDesc = "Get partial process recommendation";
 
 ORYX.I18N.Query.dialogDesciption = "Please specify your query";
 ORYX.I18N.Query.pleaseWait = "Your query is processing";
+ORYX.I18N.Query.zone = "k-zone number";
+ORYX.I18N.Query.threshold = "Similarity threshold";
+ORYX.I18N.Query.targetTask = "Target task";
+ORYX.I18N.Query.method = "Weighting method";
 ORYX.I18N.Query.queryBtn = "Get recommendation";
 
 ORYX.I18N.Query.shareFailure = "There was an exception during sharing a process!";

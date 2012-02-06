@@ -69,7 +69,20 @@ ORYX.Plugins.Query = Clazz.extend({
 		
 		var modelMeta = this.facade.getModelMetaData();
 		var reqURI = modelMeta.modelHandler;
-
+		var modelJSON = this.facade.getJSON();
+		var canvasChilds  = modelJSON.childShapes;
+		var tasks = [];
+		for(i=0; i<canvasChilds.length; i++){
+		    if(canvasChilds[i].stencil.id == 'Task' || canvasChilds[i].stencil.id == 'CollapsedSubprocess'){
+		    	tasks.push(canvasChilds[i].properties.name);
+		    }
+	    }
+		
+		var optionTxt = "";
+		for(i=0; i<tasks.length; i++){
+			optionTxt+='<option value="'+tasks[i]+'">'+tasks[i]+'</option>';
+	    }
+		
 		// Get the stencilset
 		var ss = this.facade.getStencilSets().values()[0]
 		
@@ -77,6 +90,39 @@ ORYX.Plugins.Query = Clazz.extend({
 		
 		// Define Default values
 		var defaultData = {title:Signavio.Utils.escapeHTML(name||""), summary:Signavio.Utils.escapeHTML(modelMeta.description||""), type:typeTitle, url: reqURI, namespace: modelMeta.model.stencilset.namespace, comment: '' }
+		
+		//Create components in template
+//		var slider = new Ext.form.SliderField({
+////		    renderTo: dialog,
+//		    width: 200,
+//		    value: 50,
+//		    increment: 10,
+//		    minValue: 0,
+//		    maxValue: 100
+//		});
+		
+//		Test = {}; 
+//	    Test.slideZone1 = new Ext.ux.SlideZone('slider1', {   
+//	        type: 'horizontal', 
+//	        size: 500,  
+//	        sliderWidth: 18, 
+//	        sliderHeight: 21, 
+//	        maxValue: 1000, 
+//	        minValue: 0, 
+//	        sliderSnap: 1, 
+//	        sliders: [{ value: 500,   
+//	                    name: 'start1_1' 
+//	                    }] 
+//	         }); 
+//	     
+//	    Test.slideZone1.getSlider('start1_1').on('drag', 
+//	        function() { 
+//	                $('slider_1_1_value').innerHTML = parseInt(this.value); 
+//	                $('slider_1_1_percent').innerHTML = this.percent.toFixed(2); 
+//	                $('slider_1_1_position').innerHTML = this.el.getX() + 
+//	                        1/2 * Test.slideZone1.sliderWidth;     
+//	                }  
+		
 		
 		// Create a Template
 		var dialog = new Ext.XTemplate(		
@@ -86,15 +132,30 @@ ORYX.Plugins.Query = Clazz.extend({
 				'<fieldset>',
 					'<p class="description">' + ORYX.I18N.Query.dialogDesciption + '</p>',
 					'<input type="hidden" name="namespace" value="{namespace}" />',
-//					'<p><label for="edit_model_title">' + ORYX.I18N.Save.dialogLabelTitle + '</label><input type="text" class="text" name="title" value="{title}" id="edit_model_title" onfocus="this.className = \'text activated\'" onblur="this.className = \'text\'"/></p>',
-//					'<p><label for="edit_model_summary">' + ORYX.I18N.Save.dialogLabelDesc + '</label><textarea rows="5" name="summary" id="edit_model_summary" onfocus="this.className = \'activated\'" onblur="this.className = \'\'">{summary}</textarea></p>',
-//					(modelMeta.versioning) ? '<p><label for="edit_model_comment">' + ORYX.I18N.Save.dialogLabelComment + '</label><textarea rows="5" name="comment" id="edit_model_comment" onfocus="this.className = \'activated\'" onblur="this.className = \'\'">{comment}</textarea></p>' : '',
+					'<p><label for="query_model_task">' + ORYX.I18N.Query.targetTask + '</label>' +
+						'<select class="select" name="task" id="query_model_task">'+ optionTxt + '</select>' +
+					'</p>',
+					'<p><label for="query_model_zone">' + ORYX.I18N.Query.zone + '</label>' +
+						'<select class="select" name="zone" id="query_model_zone">' +
+							'<option value="1">1</option>' +
+							'<option value="2">2</option>' +
+							'<option value="3">3</option>' +
+							'<option value="4">4</option>' +
+							'<option value="5">5</option>' +
+						'</select>' +
+					'</p>',
+					'<p><label for="query_model_method">' + ORYX.I18N.Query.zone + '</label>' +
+						'<select class="select" name="method" id="query_model_method">' +
+							'<option value="1">Levenstein</option>' +
+							'<option value="2">Improved weight</option>' +
+						'</select>' +
+					'</p>',
+//					'<span class="x-editable">{slider}</span></div>',
 					'<p><label for="edit_model_type">' + ORYX.I18N.Save.dialogLabelType + '</label><input type="text" name="type" class="text disabled" value="{type}" disabled="disabled" id="edit_model_type" /></p>',
-					
 				'</fieldset>',
 			
-			'</form>')
-	
+			'</form>');
+		
 		// Create a new window				
 		var win = new Ext.Window({
 			id		: 'Query_Window',
@@ -136,55 +197,50 @@ ORYX.Plugins.Query = Clazz.extend({
 				}.bind(this)
 			}
 	    });
-				      
+		
 		win.show();
 		
 		// Create the callback for the template
 		callback = function(form){
-
-//				var title 		= form.elements["title"].value.strip();
-//				title 			= title.length == 0 ? defaultData.title : title;
-//				
-//				var summary 	= form.elements["summary"].value.strip();	
-//				summary 		= summary.length == 0 ? defaultData.summary : summary;
-//				
-				var namespace	= form.elements["namespace"].value.strip();
-//				namespace		= namespace.length == 0 ? defaultData.namespace : namespace;
-//				
-//				var comment 	= form .elements["comment"].value.strip();
-//				comment			= comment.length == 0 ? defaultData.comment : comment;
+			var task = form.elements["task"].value;
+			var zone = form.elements["zone"].value;
+			var mothod = form.elements["method"].value;
+			var namespace	= form.elements["namespace"].value.strip();
+			modelMeta.namespace = namespace;
+			var reqURIs = reqURI.split("/");
+			var prefix = "/";
+		    for(i=1; i<reqURIs.length-1; i++){
+			    prefix+=reqURIs[i]+"/";
+		    }
+			new Ajax.Request(prefix+'query/', {
+	            method: 'get',
+	            asynchronous: true,
+				requestHeaders: {
+					"Accept":"application/json"
+				},
+				parameters: {
+					task: task,
+					zone: zone,
+					mothod: mothod,
+	            },
+				encoding: 'UTF-8',
+				onSuccess: (function(transport) {
+					var resJSON = transport.responseText.evalJSON();
+				}).bind(this),
+				onException: function(){
 				
-//				modelMeta.name = title;
-//				modelMeta.description = summary;
-//				modelMeta.parent = modelInfo.parent;
-				modelMeta.namespace = namespace;
-				Ext.Msg.alert(ORYX.I18N.Oryx.title, reqURI).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-//				this.sendSaveRequest('GET', reqURI, params, forceNew, successFn, failure);
-				new Ajax.Request('/signaviocore/p/query/', {
-		            method: 'get',
-		            asynchronous: true,
-					requestHeaders: {
-						"Accept":"application/json"
-					},
-					encoding: 'UTF-8',
-					onSuccess: (function(transport) {
-						var resJSON = transport.responseText.evalJSON();
-						Ext.Msg.alert(ORYX.I18N.Oryx.title, resJSON[0].token).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-					}).bind(this),
-					onException: function(){
+				}.bind(this),
+				onFailure: (function(transport) {
 					
-					}.bind(this),
-					onFailure: (function(transport) {
-						
-					}).bind(this),
-					on401: (function(transport) {
-						
-					}).bind(this),
-					on403: (function(transport) {
-						
-					}).bind(this)
-				});
-				win.close();
+				}).bind(this),
+				on401: (function(transport) {
+					
+				}).bind(this),
+				on403: (function(transport) {
+					
+				}).bind(this)
+			});
+			win.close();
 		}.bind(this);
 	}
 	

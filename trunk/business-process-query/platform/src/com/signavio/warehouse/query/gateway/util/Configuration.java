@@ -10,7 +10,7 @@ public class Configuration {
     private String dbURI = "jdbc:mysql://localhost/process_query";
 
     private int dbPoolMinSize = 30;
-    private int dbPoolMaxSize = 70;
+    private int dbPoolMaxSize = 100;
 
 //    public Configuration() {
 //        SAXBuilder builder = new SAXBuilder();

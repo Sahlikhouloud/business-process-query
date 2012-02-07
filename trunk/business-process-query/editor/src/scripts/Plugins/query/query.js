@@ -69,6 +69,11 @@ ORYX.Plugins.Query = Clazz.extend({
 		
 		var modelMeta = this.facade.getModelMetaData();
 		var reqURI = modelMeta.modelHandler;
+		var reqURIs = reqURI.split("/");
+		var prefix = "/";
+	    for(i=1; i<reqURIs.length-1; i++){
+		    prefix+=reqURIs[i]+"/";
+	    }
 		var modelJSON = this.facade.getJSON();
 		var canvasChilds  = modelJSON.childShapes;
 		var tasks = [];
@@ -123,7 +128,23 @@ ORYX.Plugins.Query = Clazz.extend({
 //	                        1/2 * Test.slideZone1.sliderWidth;     
 //	                }  
 		
-		
+//		'new Ajax.Request('+prefix'+"query", {})'+
+//        'method: \'get\',' +
+//        'asynchronous: true,' +
+//		'requestHeaders: {' +
+//			'"Accept":"application/json"' +
+//		'},' +
+//		'parameters: {' +
+//			'id: \'getMaxZone\'' +
+//        '},' +
+//		'encoding: \'UTF-8\',' +
+//		'onSuccess: (function(transport) {' +
+//			
+//		'}).bind(this),' +
+//		'onException: function(){' +
+//			
+//		'}.bind(this)' +
+//	'});' +
 		// Create a Template
 		var dialog = new Ext.XTemplate(		
 			// TODO find some nice words here -- copy from above ;)
@@ -133,10 +154,25 @@ ORYX.Plugins.Query = Clazz.extend({
 					'<p class="description">' + ORYX.I18N.Query.dialogDesciption + '</p>',
 					'<input type="hidden" name="namespace" value="{namespace}" />',
 					'<p><label for="query_model_task">' + ORYX.I18N.Query.targetTask + '</label>' +
-						'<select class="select" name="task" id="query_model_task">'+ optionTxt + '</select>' +
+						'<select class="select" name="task" id="query_model_task" onchange="' +
+//							'new Ajax.Request('+prefix+'query/, {'+
+//							'method: \'get\',' +
+//							'asynchronous: true,' +
+//							'parameters: {' +
+//								'id: "getMaxZone"' +
+//					        '},' +
+//							'encoding: \'UTF-8\',' +
+//							'onSuccess: (function(transport) {' +
+//								
+//							'}).bind(this),' +
+//							'onException: function(){' +
+//								
+//							'}.bind(this)' +
+//							'});' +
+						'">'+ optionTxt + '</select>' +
 					'</p>',
 					'<p><label for="query_model_zone">' + ORYX.I18N.Query.zone + '</label>' +
-						'<select class="select" name="zone" id="query_model_zone">' +
+						'<select class="select" name="zone" id="query_model_zone" >' +
 							'<option value="1">1</option>' +
 							'<option value="2">2</option>' +
 							'<option value="3">3</option>' +
@@ -146,8 +182,8 @@ ORYX.Plugins.Query = Clazz.extend({
 					'</p>',
 					'<p><label for="query_model_method">' + ORYX.I18N.Query.zone + '</label>' +
 						'<select class="select" name="method" id="query_model_method">' +
-							'<option value="1">Levenstein</option>' +
-							'<option value="2">Improved weight</option>' +
+							'<option value="2">Levenstein</option>' +
+							'<option value="4">Improved weight</option>' +
 						'</select>' +
 					'</p>',
 //					'<span class="x-editable">{slider}</span></div>',
@@ -204,14 +240,9 @@ ORYX.Plugins.Query = Clazz.extend({
 		callback = function(form){
 			var task = form.elements["task"].value;
 			var zone = form.elements["zone"].value;
-			var mothod = form.elements["method"].value;
+			var method = form.elements["method"].value;
 			var namespace	= form.elements["namespace"].value.strip();
 			modelMeta.namespace = namespace;
-			var reqURIs = reqURI.split("/");
-			var prefix = "/";
-		    for(i=1; i<reqURIs.length-1; i++){
-			    prefix+=reqURIs[i]+"/";
-		    }
 			new Ajax.Request(prefix+'query/', {
 	            method: 'get',
 	            asynchronous: true,
@@ -219,9 +250,11 @@ ORYX.Plugins.Query = Clazz.extend({
 					"Accept":"application/json"
 				},
 				parameters: {
+					id: 'getRecommendation',
 					task: task,
 					zone: zone,
-					mothod: mothod,
+					method: method,
+					processID: modelMeta.name
 	            },
 				encoding: 'UTF-8',
 				onSuccess: (function(transport) {

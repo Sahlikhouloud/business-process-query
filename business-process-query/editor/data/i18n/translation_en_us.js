@@ -222,6 +222,7 @@ ORYX.I18N.Query.queryBtn = "Get recommendation";
 
 ORYX.I18N.Query.shareFailure = "There was an exception during sharing a process!";
 ORYX.I18N.Query.syntaxFailure = "Cannot share a process containing syntax error!";
+ORYX.I18N.Query.getFailure = "There was an exception during getting a recommendation!";
 
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 

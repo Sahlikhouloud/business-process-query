@@ -18,6 +18,7 @@ import com.signavio.platform.security.business.FsSecureBusinessObject;
 import com.signavio.platform.security.business.FsSecurityManager;
 import com.signavio.warehouse.directory.business.FsDirectory;
 import com.signavio.warehouse.query.business.Process;
+import com.signavio.warehouse.query.business.ProcessZone;
 import com.signavio.warehouse.query.util.IConstant;
 
 @HandlerConfiguration(uri = "/query", rel = "que")
@@ -34,21 +35,42 @@ public class QueryHandler extends BasisHandler {
 			HttpServletRequest req, HttpServletResponse res,
 			FsAccessToken token, T sbo) {
 		System.out.println("QueryHandler... doGet ");
-		JSONArray jsons = new JSONArray();
-		JSONObject entry = new JSONObject();
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
+		JSONArray jsons = null;
+		String jobDesc = "";
 		try {
-			entry.put("token", token);
-		} catch (JSONException e1) {
+			jobDesc = jParams.getString("id");
+		} catch (JSONException e2) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e2.printStackTrace();
 		}
-		jsons.put(entry);
-		try {
-			res.getWriter().write(jsons.toString());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		if(jobDesc.equals("getRecommendation")){
+			try {
+				String processID = jParams.getString("processID");
+				String taskName = jParams.getString("task");
+				int zone = jParams.getInt("zone");
+				int method = jParams.getInt("method");
+				
+				ProcessZone targetProcess = new ProcessZone(processID);
+				boolean consideringZoneWeight = ProcessZone
+						.isConsideringZoneweight(method);
+				boolean considerSimOfGateway = ProcessZone
+						.isConsideringSimOfGateway(method);
+
+				targetProcess.computeMatchingValue(zone, zone,
+						consideringZoneWeight, considerSimOfGateway, taskName);
+				jsons = targetProcess.createJSONRecommendation(taskName);
+				res.getWriter().write(jsons.toString());
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else if(jobDesc.equals("getMaxZone")){
+			
 		}
 	}
 
@@ -62,7 +84,6 @@ public class QueryHandler extends BasisHandler {
 		// Get the parameter list
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
 		try {
-//			System.out.println(jParams.getString("xml");
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");

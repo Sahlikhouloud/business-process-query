@@ -36,7 +36,6 @@ public class QueryHandler extends BasisHandler {
 			FsAccessToken token, T sbo) {
 		System.out.println("QueryHandler... doGet ");
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
-		JSONArray jsons = null;
 		String jobDesc = "";
 		try {
 			jobDesc = jParams.getString("id");
@@ -44,33 +43,63 @@ public class QueryHandler extends BasisHandler {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
-		if(jobDesc.equals("getRecommendation")){
-			try {
-				String processID = jParams.getString("processID");
-				String taskName = jParams.getString("task");
-				int zone = jParams.getInt("zone");
-				int method = jParams.getInt("method");
-				
-				ProcessZone targetProcess = new ProcessZone(processID);
-				boolean consideringZoneWeight = ProcessZone
-						.isConsideringZoneweight(method);
-				boolean considerSimOfGateway = ProcessZone
-						.isConsideringSimOfGateway(method);
 
-				targetProcess.computeMatchingValue(zone, zone,
-						consideringZoneWeight, considerSimOfGateway, taskName);
-				jsons = targetProcess.createJSONRecommendation(taskName);
-				res.getWriter().write(jsons.toString());
-			} catch (JSONException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if (jobDesc.equals("getRecommendation")) {
+			this.getRecommendation(jParams, res);
+		} else if (jobDesc.equals("getMaxZone")) {
+			this.getMaxZone(jParams, res);
+		}
+	}
+	
+	private void getMaxZone(JSONObject jParams, HttpServletResponse res){
+		try {
+			JSONArray jsons = new JSONArray();
+			String processID = jParams.getString("processID");
+			String taskName = jParams.getString("task");
+			ProcessZone process = new ProcessZone(processID);
+			int zone = process.getTask(taskName).getNoOfZone();
+			for(int i=1; i<=zone; i++){
+				JSONObject json = new JSONObject();
+					json.put("myId", i);
+					json.put("myText", i);
+				jsons.put(json);
 			}
-		}else if(jobDesc.equals("getMaxZone")){
-			
+			JSONObject root = new JSONObject();
+			root.put("zone", jsons);
+			res.getWriter().write(root.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void getRecommendation(JSONObject jParams, HttpServletResponse res) {
+		try {
+			JSONArray jsons = new JSONArray();
+			String processID = jParams.getString("processID");
+			String taskName = jParams.getString("task");
+			int zone = jParams.getInt("zone");
+			int method = jParams.getInt("method");
+
+			ProcessZone targetProcess = new ProcessZone(processID);
+			boolean consideringZoneWeight = ProcessZone
+					.isConsideringZoneweight(method);
+			boolean considerSimOfGateway = ProcessZone
+					.isConsideringSimOfGateway(method);
+
+			targetProcess.computeMatchingValue(zone, zone,
+					consideringZoneWeight, considerSimOfGateway, taskName);
+			jsons = targetProcess.createJSONRecommendation(taskName);
+			res.getWriter().write(jsons.toString());
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

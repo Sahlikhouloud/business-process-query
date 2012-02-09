@@ -18,7 +18,7 @@ ORYX.Plugins.Query = Clazz.extend({
 	// Constructor 
     construct: function(facade){
     
-        this.facade = facade;     
+        this.facade = facade;
 		
 		// Offers the functionality of undo                
         this.facade.offer({
@@ -46,21 +46,6 @@ ORYX.Plugins.Query = Clazz.extend({
 		
 	},
 	
-	sendSaveRequest: function(method, url, params, forceNew, success, failure){
-		
-		// Send the request to the server.
-		Ext.Ajax.request({
-			url				: url,
-			method			: method,
-			timeout			: 1800000,
-			disableCaching	: true,
-			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
-			params			: params,
-			success			: success,
-			failure			: failure
-		});
-	},
-	
 	/**
 	 * Does the querying
 	 * 
@@ -77,16 +62,17 @@ ORYX.Plugins.Query = Clazz.extend({
 		var modelJSON = this.facade.getJSON();
 		var canvasChilds  = modelJSON.childShapes;
 		var tasks = [];
-		for(i=0; i<canvasChilds.length; i++){
+		for(var i=0; i<canvasChilds.length; i++){
 		    if(canvasChilds[i].stencil.id == 'Task' || canvasChilds[i].stencil.id == 'CollapsedSubprocess'){
 		    	tasks.push(canvasChilds[i].properties.name);
 		    }
 	    }
 		
-		var optionTxt = "";
+		var taskTxt = "[";
 		for(i=0; i<tasks.length; i++){
-			optionTxt+='<option value="'+tasks[i]+'">'+tasks[i]+'</option>';
+			taskTxt+="['"+tasks[i].strip()+"', '"+tasks[i].strip()+"'],";
 	    }
+		taskTxt = taskTxt.substring(0,taskTxt.length-1)+"]";
 		
 		// Get the stencilset
 		var ss = this.facade.getStencilSets().values()[0]
@@ -96,114 +82,117 @@ ORYX.Plugins.Query = Clazz.extend({
 		// Define Default values
 		var defaultData = {title:Signavio.Utils.escapeHTML(name||""), summary:Signavio.Utils.escapeHTML(modelMeta.description||""), type:typeTitle, url: reqURI, namespace: modelMeta.model.stencilset.namespace, comment: '' }
 		
-		//Create components in template
-//		var slider = new Ext.form.SliderField({
-////		    renderTo: dialog,
-//		    width: 200,
-//		    value: 50,
-//		    increment: 10,
-//		    minValue: 0,
-//		    maxValue: 100
-//		});
+		// Create form
+		var methods = [
+		                [2, 'Levenstein']
+		               ,[4, 'Improved weight']
+		           ];
+		var formPanel = new Ext.form.FormPanel({
+			id		: 'query_model',
+			bodyStyle:'padding:10px',
+	        width	: 'auto',
+	        height	: 'auto',
+            items:[ 
+                     new Ext.form.ComboBox({
+                    	fieldLabel: ORYX.I18N.Query.targetTask,
+                    	name: 'task',
+                    	id: 'task',
+                    	store: new Ext.data.SimpleStore({
+   					    	fields:['myId', 'myText'],
+   					        data:eval(taskTxt)
+   					    })
+                     	,allowBlank:false
+                     	,autoWidth:true
+                     	,emptyText: '-- select --'
+   					    ,valueField:'myId'
+					    ,displayField:'myText'
+					    ,mode:'local'
+					    ,triggerAction: 'all'
+					    ,listeners:{
+					       'select': function(){
+			    	   			// get max zone
+					    	   	Ext.Ajax.request({
+						   			url				: prefix+'query/',
+						   			method			: "GET",
+						   			timeout			: 1800000,
+						   			disableCaching	: true,
+						   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+						   			params			: {
+														id: 'getMaxZone',
+														task: this.getValue().strip(),
+														processID: modelMeta.name
+										              },
+						   			success			: function(transport) {
+						   								var zoneJson = transport.responseText.evalJSON();
+						   								Ext.getCmp('zone').reset();
+						   								var zoneCmp = Ext.getCmp('zone');
+						   								var rt = Ext.data.Record.create([
+						   								    {name: 'myId'},
+						   								    {name: 'myText'}
+						   								]);
+						   								var zoneStore = new Ext.data.Store ({
+						   									isAutoLoad: true,
+						   								    reader: new Ext.data.JsonReader({
+						   								    	root: 'zone',
+							   								    fields: [
+							   								        {name: 'myId', mapping: 'myId'},
+							   								        {name: 'myText', mapping: 'myText'}
+							   								    ]},rt)
+						   								})
+						   								zoneStore.loadData(zoneJson);
+						   								zoneCmp.bindStore(zoneStore);
+													  },
+						   			failure			: function(transport) {
+													  }
+						   		})
+				    	   	}
+					    }
+                     }),
+                     new Ext.form.ComboBox({
+                    	fieldLabel: ORYX.I18N.Query.zone,
+                    	name: 'zone',
+                    	id: 'zone',
+                     	store: new Ext.data.SimpleStore({
+   					    	fields:['myId', 'myText'],
+   					        data:[]
+   					    })
+                     	,allowBlank:false
+                     	,emptyText: '-- select --'
+   					    ,valueField:'myId'
+ 					    ,displayField:'myText'
+ 					    ,mode:'local'
+ 					    ,triggerAction: 'all'
+                      }),
+                      new Ext.form.ComboBox({
+                    	fieldLabel: ORYX.I18N.Query.method,
+                    	name: 'method',
+                    	id: 'method',
+   					    store: new Ext.data.SimpleStore({
+   					    	fields:['myId', 'myText'],
+   					        data:methods
+   					    })
+                      	,allowBlank:false
+                      	,emptyText: '-- select --'
+   					    ,valueField:'myId'
+   					    ,displayField:'myText'
+   					    ,mode:'local'
+   					    ,triggerAction: 'all'
+                      })
+            ] 
+		});
 		
-//		Test = {}; 
-//	    Test.slideZone1 = new Ext.ux.SlideZone('slider1', {   
-//	        type: 'horizontal', 
-//	        size: 500,  
-//	        sliderWidth: 18, 
-//	        sliderHeight: 21, 
-//	        maxValue: 1000, 
-//	        minValue: 0, 
-//	        sliderSnap: 1, 
-//	        sliders: [{ value: 500,   
-//	                    name: 'start1_1' 
-//	                    }] 
-//	         }); 
-//	     
-//	    Test.slideZone1.getSlider('start1_1').on('drag', 
-//	        function() { 
-//	                $('slider_1_1_value').innerHTML = parseInt(this.value); 
-//	                $('slider_1_1_percent').innerHTML = this.percent.toFixed(2); 
-//	                $('slider_1_1_position').innerHTML = this.el.getX() + 
-//	                        1/2 * Test.slideZone1.sliderWidth;     
-//	                }  
-		
-//		'new Ajax.Request('+prefix'+"query", {})'+
-//        'method: \'get\',' +
-//        'asynchronous: true,' +
-//		'requestHeaders: {' +
-//			'"Accept":"application/json"' +
-//		'},' +
-//		'parameters: {' +
-//			'id: \'getMaxZone\'' +
-//        '},' +
-//		'encoding: \'UTF-8\',' +
-//		'onSuccess: (function(transport) {' +
-//			
-//		'}).bind(this),' +
-//		'onException: function(){' +
-//			
-//		'}.bind(this)' +
-//	'});' +
-		// Create a Template
-		var dialog = new Ext.XTemplate(		
-			// TODO find some nice words here -- copy from above ;)
-			'<form class="oryx_repository_edit_model" action="#" id="query_model" onsubmit="return false;">',
-							
-				'<fieldset>',
-					'<p class="description">' + ORYX.I18N.Query.dialogDesciption + '</p>',
-					'<input type="hidden" name="namespace" value="{namespace}" />',
-					'<p><label for="query_model_task">' + ORYX.I18N.Query.targetTask + '</label>' +
-						'<select class="select" name="task" id="query_model_task" onchange="' +
-//							'new Ajax.Request('+prefix+'query/, {'+
-//							'method: \'get\',' +
-//							'asynchronous: true,' +
-//							'parameters: {' +
-//								'id: "getMaxZone"' +
-//					        '},' +
-//							'encoding: \'UTF-8\',' +
-//							'onSuccess: (function(transport) {' +
-//								
-//							'}).bind(this),' +
-//							'onException: function(){' +
-//								
-//							'}.bind(this)' +
-//							'});' +
-						'">'+ optionTxt + '</select>' +
-					'</p>',
-					'<p><label for="query_model_zone">' + ORYX.I18N.Query.zone + '</label>' +
-						'<select class="select" name="zone" id="query_model_zone" >' +
-							'<option value="1">1</option>' +
-							'<option value="2">2</option>' +
-							'<option value="3">3</option>' +
-							'<option value="4">4</option>' +
-							'<option value="5">5</option>' +
-						'</select>' +
-					'</p>',
-					'<p><label for="query_model_method">' + ORYX.I18N.Query.zone + '</label>' +
-						'<select class="select" name="method" id="query_model_method">' +
-							'<option value="2">Levenstein</option>' +
-							'<option value="4">Improved weight</option>' +
-						'</select>' +
-					'</p>',
-//					'<span class="x-editable">{slider}</span></div>',
-					'<p><label for="edit_model_type">' + ORYX.I18N.Save.dialogLabelType + '</label><input type="text" name="type" class="text disabled" value="{type}" disabled="disabled" id="edit_model_type" /></p>',
-				'</fieldset>',
-			
-			'</form>');
-		
-		// Create a new window				
+		// Create new window and attach form into it
 		var win = new Ext.Window({
-			id		: 'Query_Window',
+	        id		: 'Query_Window',
 	        width	: 'auto',
 	        height	: 'auto',
 		    title	: ORYX.I18N.Query.queryDesc,
 	        modal	: true,
 	        resize	: false,
 			bodyStyle: 'background:#FFFFFF',
-	        html	: dialog.apply( defaultData ),
-	        defaultButton: 0,
-			buttons:[{
+	        items  : [formPanel],
+            defaultButton: 0,
+				buttons:[{
 				text: ORYX.I18N.Query.queryBtn,
 				handler: function(){
 				
@@ -211,7 +200,7 @@ ORYX.Plugins.Query = Clazz.extend({
 					
 					window.setTimeout(function(){
 						
-						callback($('query_model'));
+						callback(formPanel.getForm());
 						
 					}.bind(this), 10);			
 				},
@@ -221,28 +210,26 @@ ORYX.Plugins.Query = Clazz.extend({
 					}
 				}
 			},{
-            	text: ORYX.I18N.Save.close,
-            	handler: function(){
+	        	text: ORYX.I18N.Save.close,
+	        	handler: function(){
 	               win.close();
-            	}.bind(this)
+	        	}.bind(this)
 			}],
 			listeners: {
 				close: function(){					
-                	win.destroy();
+	            	win.destroy();
 					delete this.saving;
 				}.bind(this)
-			}
+			}  
 	    });
 		
 		win.show();
 		
 		// Create the callback for the template
 		callback = function(form){
-			var task = form.elements["task"].value;
-			var zone = form.elements["zone"].value;
-			var method = form.elements["method"].value;
-			var namespace	= form.elements["namespace"].value.strip();
-			modelMeta.namespace = namespace;
+			var task = form.findField('task').getValue();
+			var zone = form.findField('zone').getValue();
+			var method = form.findField('method').getValue();
 			new Ajax.Request(prefix+'query/', {
 	            method: 'get',
 	            asynchronous: true,
@@ -261,16 +248,16 @@ ORYX.Plugins.Query = Clazz.extend({
 					var resJSON = transport.responseText.evalJSON();
 				}).bind(this),
 				onException: function(){
-				
+					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
 				}.bind(this),
 				onFailure: (function(transport) {
-					
+					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
 				}).bind(this),
 				on401: (function(transport) {
-					
+					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
 				}).bind(this),
 				on403: (function(transport) {
-					
+					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
 				}).bind(this)
 			});
 			win.close();

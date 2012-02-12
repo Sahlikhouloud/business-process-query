@@ -78,7 +78,8 @@ public class QueryHandler extends BasisHandler {
 	
 	private void getRecommendation(JSONObject jParams, HttpServletResponse res) {
 		try {
-			JSONArray jsons = new JSONArray();
+			JSONObject json = new JSONObject();
+			JSONArray resultJSON = new JSONArray();
 			String processID = jParams.getString("processID");
 			String taskName = jParams.getString("task");
 			int zone = jParams.getInt("zone");
@@ -92,8 +93,13 @@ public class QueryHandler extends BasisHandler {
 
 			targetProcess.computeMatchingValue(zone, zone,
 					consideringZoneWeight, considerSimOfGateway, taskName);
-			jsons = targetProcess.createJSONRecommendation(taskName);
-			res.getWriter().write(jsons.toString());
+			resultJSON = targetProcess.createJSONRecommendation(taskName);
+			json.put("task", taskName);
+			json.put("processID", processID);
+			json.put("zone", zone);
+			json.put("method", IConstant.getMethodName(method));
+			json.put("results", resultJSON);
+			res.getWriter().write(json.toString());
 		} catch (JSONException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

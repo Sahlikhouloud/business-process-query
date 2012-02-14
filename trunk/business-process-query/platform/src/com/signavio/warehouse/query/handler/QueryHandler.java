@@ -48,6 +48,28 @@ public class QueryHandler extends BasisHandler {
 			this.getRecommendation(jParams, res);
 		} else if (jobDesc.equals("getMaxZone")) {
 			this.getMaxZone(jParams, res);
+		} else if(jobDesc.equals("getSVG")){
+			this.getSVG(jParams, res, token);
+		}
+	}
+	
+	private void getSVG(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+		try {
+			String processID = jParams.getString("processID");
+			String taskName = jParams.getString("task");
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
+
+			File fXmlFile = this.openSignavioFile(parentId, token, processID);
+			String svgRepresentation = Process.getSVGRepresentation(fXmlFile);
+			System.out.println(svgRepresentation);
+			res.getWriter().write(svgRepresentation);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -123,7 +145,7 @@ public class QueryHandler extends BasisHandler {
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
 
-			File fXmlFile = this.openFile(parentId, token, name);
+			File fXmlFile = this.openBpmn20File(parentId, token, name);
 
 			Process process = new Process(name);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
@@ -156,7 +178,7 @@ public class QueryHandler extends BasisHandler {
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
 
-			File fXmlFile = this.openFile(parentId, token, name);
+			File fXmlFile = this.openBpmn20File(parentId, token, name);
 
 			Process process = new Process(name);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
@@ -184,11 +206,20 @@ public class QueryHandler extends BasisHandler {
 		}
 	}
 
-	private File openFile(String parentId, FsAccessToken token, String name) {
+	private File openBpmn20File(String parentId, FsAccessToken token, String name) {
 
 		FsDirectory dir = FsSecurityManager.getInstance().loadObject(
 				FsDirectory.class, parentId, token);
 		String path = dir.getPath() + "/" + name + ".bpmn20.xml";
+
+		return new File(path);
+	}
+	
+	private File openSignavioFile(String parentId, FsAccessToken token, String name) {
+
+		FsDirectory dir = FsSecurityManager.getInstance().loadObject(
+				FsDirectory.class, parentId, token);
+		String path = dir.getPath() + "/" + name + ".signavio.xml";
 
 		return new File(path);
 	}

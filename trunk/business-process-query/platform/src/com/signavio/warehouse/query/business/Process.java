@@ -15,6 +15,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -24,6 +25,7 @@ import org.xml.sax.SAXException;
 import com.signavio.warehouse.query.gateway.AB3CCollectionGateway;
 import com.signavio.warehouse.query.gateway.ServiceNeighborsGateway;
 import com.signavio.warehouse.query.gateway.util.BaseGateway;
+import com.signavio.warehouse.query.util.XMLUtil;
 
 public class Process {
 
@@ -886,6 +888,42 @@ public class Process {
 		// alreadyCheck = null;
 	}
 
+	public static String getSVGRepresentation(File fXmlFile){
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		String svgTxt = "";
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(fXmlFile);
+			
+			// normalize text representation
+			doc.getDocumentElement().normalize();
+			System.out.println("Root element :"
+					+ doc.getDocumentElement().getNodeName());
+			
+			//there is only one svg-representation tag
+			NodeList svg = doc.getElementsByTagName("svg-representation");
+			Node svgXml = svg.item(0);
+			if (svgXml != null
+					&& svgXml.getNodeType() == Node.ELEMENT_NODE) {
+				Element eSvgXml = (Element) svgXml;
+				svgTxt = XMLUtil.getCharacterDataFromElement(eSvgXml);
+			}
+			// normalize text representation
+			doc.getDocumentElement().normalize();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return svgTxt;
+	}
+	
 	public String mapXMLfileIntoModel(File fXmlFile) {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
@@ -897,6 +935,7 @@ public class Process {
 			doc.getDocumentElement().normalize();
 			System.out.println("Root element :"
 					+ doc.getDocumentElement().getNodeName());
+			
 			// always contain only one process tag
 			NodeList processes = doc.getElementsByTagName("process");
 			Node processXML = processes.item(0);

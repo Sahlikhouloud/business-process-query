@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import com.signavio.warehouse.query.util.ContextMatching;
 import com.signavio.warehouse.query.util.IConstant;
+import com.signavio.warehouse.query.util.NumberUtil;
 
 public class Task {
 
@@ -313,7 +314,7 @@ public class Task {
 				json.put("comparedTask", result.getComparedTask());
 				json.put("zoneWeight", result.isZoneWeight());
 				json.put("zone", result.getZone());
-				json.put("matchingValue", result.getMatchingValue());
+				json.put("matchingValue", NumberUtil.round(result.getMatchingValue(), 2));
 				json.put("improvedWeight", result.isImprovedWeight());
 				json.put("pivotValue", result.getPivotValue());
 				json.put("scaleValue", result.getScaleValue());

@@ -193,10 +193,9 @@ ORYX.Plugins.Query = Clazz.extend({
 	        id		: 'Query_Window',
 	        width	: 'auto',
 	        height	: 'auto',
-	        autoScroll: true,
 		    title	: ORYX.I18N.Query.queryDesc,
 	        modal	: true,
-	        resize	: false,
+	        resizable	: false,
 			bodyStyle: 'background:#FFFFFF',
 	        items  : [formPanel],
             defaultButton: 0,
@@ -230,90 +229,6 @@ ORYX.Plugins.Query = Clazz.extend({
 				}.bind(this)
 			}  
 	    });
-		
-		win.show();
-		
-		var successQuery = function(transport) {
-			var resJSON = transport.responseText.evalJSON();
-			var rt = Ext.data.Record.create([
-			    {name: 'comparedTask'},
-			    {name: 'comparedProcessID'},
-			    {name: 'matchingValue'}
-			])
-			var resultStore = new Ext.data.Store ({
-				isAutoLoad: true,
-			    reader: new Ext.data.JsonReader({
-			    	root: 'results',
-				    fields: [
-				        {name: 'comparedTask', mapping: 'comparedTask'},
-				        {name: 'comparedProcessID', mapping: 'comparedProcessID'},
-				        {name: 'matchingValue', mapping: 'matchingValue'}
-				    ]},rt)
-			})
-			resultStore.loadData(resJSON);
-			var grid = new Ext.grid.GridPanel({
-			    store: resultStore,
-			    colModel: new Ext.grid.ColumnModel({
-			    	defaultSortable: true,
-			    	defaults: {
-			            width: 120,
-			            sortable: true
-			        },
-			        columns: [
-			            {id: 'similarTask', header: 'Similar tasks', dataIndex: 'comparedTask', type:'string'},
-			            {id: 'processID', header: 'ProcessID', dataIndex: 'comparedProcessID', type:'string'},
-			            {id: 'similarValue', header: 'Similarity value', dataIndex: 'matchingValue', type:'float'},
-		            ]
-			    }),
-			    viewConfig: {
-			        forceFit: true,
-//			      Return CSS class to apply to rows depending upon data values
-			        getRowClass: function(record, index) {
-			            var c = record.get('matchingValue');
-			            if (c < 0.5) {
-			                return 'price-fall';
-			            } else if (c > 0) {
-			                return 'price-rise';
-			            }
-			        }
-			    },
-			    sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
-			    width: 600,
-			    height: 300,
-			    frame: true,
-			    forceFit: true,
-//			    title: ORYX.I18N.Query.queryResultsDesc,
-			    iconCls: 'icon-grid'
-			});
-			
-			// Create new window and attach grid results into it
-			var winResults = new Ext.Window({
-				id		: 'Query_Result_Window',
-		        width	: 'auto',
-		        height	: 'auto',
-//		        autoScroll: true,
-			    title	: ORYX.I18N.Query.queryResultsDesc,
-		        modal	: true,
-		        resize	: true,
-				bodyStyle: 'background:#FFFFFF',
-		        items  : [grid],
-	            defaultButton: 0,
-		        buttons:[{
-	            	text: ORYX.I18N.Save.close,
-	            	handler: function(){
-	            		winResults.close();
-	            	}.bind(this)
-				}],
-				listeners: {
-					close: function(){					
-						winResults.destroy();
-						delete this.saving;
-					}.bind(this)
-				}
-		    });
-			win.close();
-			winResults.show();
-		}.bind(this);
 		
 		// Create the callback for the template
 		callback = function(form){
@@ -557,6 +472,168 @@ ORYX.Plugins.Query = Clazz.extend({
 //		    });
 //			winResults.show();
 			
+		}.bind(this);
+		
+		win.show();
+		
+		var showProcessImg = function(smObj, rowIndex, record) {
+			
+			Ext.WindowMgr.get('Query_Result_Window').body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
+			
+			//get SVG from Signavio file
+			Ext.Ajax.request({
+	   			url				: prefix+'query/',
+	   			method			: "GET",
+	   			timeout			: 1800000,
+	   			disableCaching	: true,
+	   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+	   			params			: {
+									id: 'getSVG',
+									task: record.get('comparedTask').strip(),
+									processID: record.get('comparedProcessID').strip(),
+									parent: modelMeta.parent
+					              },
+	   			success			: function(transport) {
+	   								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
+					   				Ext.WindowMgr.get('Query_Result_Window').hide();
+					   				var defaultData = {processID:record.get('comparedProcessID').strip(), taskName:record.get('comparedTask').strip()}
+					   				// Create a Template
+					   				var dialog = new Ext.XTemplate(		
+					   						'<p style="padding: 10px;"> <big><b>Task :</b><i> {taskName} </i><br/> <b>Process :</b><i> {processID} </i></big></p>',
+					   						'<div style="width: 900px; height: 400px; overflow:scroll;">' + transport.responseText + '</div>'
+					   				)
+					   				
+					   				// Create new window and SVG tag into it
+					   				var winSVG = new Ext.Window({
+					   			        id		: 'svg_Window',
+					   			        width	: 'auto',
+					   			        height	: 'auto',
+					   				    title	: ORYX.I18N.Query.queryResultsSVGDesc,
+//					   				    maximizable: true,
+					   			        modal	: true,
+					   			        resizable	: false,
+					   					bodyStyle: 'background:#FFFFFF',
+					   					html: dialog.apply(defaultData),
+					   		            defaultButton: 0,
+					   						buttons:[{
+					   						text: ORYX.I18N.Query.backBtn,
+					   						handler: function(){
+					   							winSVG.close();
+					   							Ext.WindowMgr.get('Query_Result_Window').show();
+					   						},
+					   						listeners:{
+					   							render:function(){
+					   								this.focus();
+					   							}
+					   						}
+					   					},{
+					   			        	text: ORYX.I18N.Save.close,
+					   			        	handler: function(){
+					   			        		winSVG.close();
+					   			        	}.bind(this)
+					   					}],
+					   					listeners: {
+					   						close: function(){					
+					   							winSVG.destroy();
+					   							delete this.saving;
+					   						}.bind(this)
+					   					}  
+					   			    });
+					   				winSVG.show();
+								  },
+	   			failure			: function(transport) {
+	   								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
+	   								Ext.WindowMgr.get('Query_Result_Window').hide();
+	   								Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getSVGFailure+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+	   								Ext.WindowMgr.get('Query_Result_Window').show();
+								  }
+	   		})
+	   		
+		}.bind(this);
+		
+		var successQuery = function(transport) {
+			var resJSON = transport.responseText.evalJSON();
+			var rt = Ext.data.Record.create([
+			    {name: 'comparedTask'},
+			    {name: 'comparedProcessID'},
+			    {name: 'matchingValue'}
+			])
+			var resultStore = new Ext.data.Store ({
+				isAutoLoad: true,
+			    reader: new Ext.data.JsonReader({
+			    	root: 'results',
+				    fields: [
+				        {name: 'comparedTask', mapping: 'comparedTask'},
+				        {name: 'comparedProcessID', mapping: 'comparedProcessID'},
+				        {name: 'matchingValue', mapping: 'matchingValue'}
+				    ]},rt)
+			})
+			
+			resultStore.loadData(resJSON);
+			
+			var grid = new Ext.grid.GridPanel({
+				id:	'grid_results',
+			    store: resultStore,
+			    autoScroll: true,
+			    colModel: new Ext.grid.ColumnModel({
+			    	defaultSortable: true,
+			    	defaults: {
+			            width: 120,
+			            sortable: true
+			        },
+			        columns: [
+			            {id: 'similarTask', header: 'Similar tasks', dataIndex: 'comparedTask', type:'string', 
+			            	renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+//			            		metaData.attr = 'ext:qtip="' + value + '"';
+			            		return value;
+			            	}
+			            },
+			            {id: 'processID', header: 'ProcessID', dataIndex: 'comparedProcessID', type:'string'},
+			            {id: 'similarValue', header: 'Similarity value', dataIndex: 'matchingValue', type:'float'},
+		            ]
+			    }),
+			    viewConfig: {
+			        forceFit: true,
+			    },
+			    sm: new Ext.grid.RowSelectionModel({
+	                singleSelect: true,
+	                listeners: {
+	                     rowselect: showProcessImg
+	               }
+	            }),
+			    width: 800,
+			    height: 400,
+			    frame: true,
+			    layout: 'fit',
+			    iconCls: 'icon-grid'
+			});
+			
+			// Create new window and attach grid results into it
+			var winResults = new Ext.Window({
+				id		: 'Query_Result_Window',
+		        width	: 'auto',
+		        height	: 'auto',
+			    title	: ORYX.I18N.Query.queryResultsDesc,
+		        modal	: true,
+		        resizable	: false,
+				bodyStyle: 'background:#FFFFFF',
+		        items  : [grid],
+	            defaultButton: 0,
+		        buttons:[{
+	            	text: ORYX.I18N.Save.close,
+	            	handler: function(){
+	            		winResults.close();
+	            	}.bind(this)
+				}],
+				listeners: {
+					close: function(){					
+						winResults.destroy();
+						delete this.saving;
+					}.bind(this)
+				}
+		    });
+			win.close();
+			winResults.show();
 		}.bind(this);
 	}
 	

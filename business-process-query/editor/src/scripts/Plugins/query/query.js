@@ -496,11 +496,17 @@ ORYX.Plugins.Query = Clazz.extend({
 	   			success			: function(transport) {
 	   								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
 					   				Ext.WindowMgr.get('Query_Result_Window').hide();
-					   				var defaultData = {processID:record.get('comparedProcessID').strip(), taskName:record.get('comparedTask').strip()}
+					   				var defaultData = {processID:record.get('comparedProcessID').strip(), taskName:record.get('comparedTask').strip(), simValue:record.get('matchingValue') }
 					   				// Create a Template
-					   				var dialog = new Ext.XTemplate(		
-					   						'<p style="padding: 10px;"> <big><b>Task :</b><i> {taskName} </i><br/> <b>Process :</b><i> {processID} </i></big></p>',
-					   						'<div style="width: 900px; height: 400px; overflow:scroll;">' + transport.responseText + '</div>'
+					   				var dialog = new Ext.XTemplate(	
+					   						'<div style="width: 900px; height: 400px; overflow:scroll;">',
+						   						'<p style="border-style:solid; border-width:1px; padding:5px; margin:2px; position:absolute; top:3px; left:10px; border-color: #C3C3C3; background-color: #F0F0F0; color:#383838;">',
+						   							'Task : {taskName} <br/>',
+						   							'Process : {processID} <br/>',
+						   							'Sim. value : {simValue} <br/>',
+						   						'</p>',
+						   						'<div>' + transport.responseText + '</div>',
+					   						'</div>'
 					   				)
 					   				
 					   				// Create new window and SVG tag into it
@@ -514,6 +520,7 @@ ORYX.Plugins.Query = Clazz.extend({
 					   			        resizable	: false,
 					   					bodyStyle: 'background:#FFFFFF',
 					   					html: dialog.apply(defaultData),
+					   					frame: true,
 					   		            defaultButton: 0,
 					   						buttons:[{
 					   						text: ORYX.I18N.Query.backBtn,
@@ -578,18 +585,17 @@ ORYX.Plugins.Query = Clazz.extend({
 			    colModel: new Ext.grid.ColumnModel({
 			    	defaultSortable: true,
 			    	defaults: {
-			            width: 120,
 			            sortable: true
 			        },
 			        columns: [
-			            {id: 'similarTask', header: 'Similar tasks', dataIndex: 'comparedTask', type:'string', 
+			            {id: 'similarTask', width: 10, header: 'Similar tasks', dataIndex: 'comparedTask', type:'string', 
 			            	renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
 //			            		metaData.attr = 'ext:qtip="' + value + '"';
 			            		return value;
 			            	}
 			            },
-			            {id: 'processID', header: 'ProcessID', dataIndex: 'comparedProcessID', type:'string'},
-			            {id: 'similarValue', header: 'Similarity value', dataIndex: 'matchingValue', type:'float'},
+			            {id: 'processID', width: 10, header: 'ProcessID', dataIndex: 'comparedProcessID', type:'string'},
+			            {id: 'similarValue', width: 10, header: 'Similarity value', dataIndex: 'matchingValue', type:'float'},
 		            ]
 			    }),
 			    viewConfig: {
@@ -608,6 +614,43 @@ ORYX.Plugins.Query = Clazz.extend({
 			    iconCls: 'icon-grid'
 			});
 			
+			var defaultData1 = {processID:resJSON.task, taskName:resJSON.processID, zone:resJSON.zone, method:resJSON.method}
+				// Create a Template
+			var dialog1 = new Ext.XTemplate(		
+					'<div style="height: 370px; width:250; background-color: #F0F0F0;">',
+						'<p style="padding:5px; margin:2px; color:#383838;">',
+							'Task : {taskName} <br/>',
+							'Process : {processID} <br/>',
+							'Zone : {zone} <br/>',
+							'Method : {method} <br/>',
+						'</p>',
+					'</div>'
+			)
+			var panel = new Ext.Panel({
+			    layout:'border',
+			    defaults: {
+			        collapsible: true,
+			        split: true
+			    },
+			    width: 800,
+			    height: 400,
+			    items: [{
+			        title: ORYX.I18N.Query.queryDetailsDesc,
+			        region:'west',
+			        margins: '5 0 0 0',
+			        cmargins: '5 5 0 0',
+			        width: 175,
+			        minSize: 100,
+			        maxSize: 250,
+			        html: dialog1.apply(defaultData1)
+			    },{
+			    	collapsible: false,
+			        region:'center',
+			        margins: '5 0 0 0',
+			        items: [grid]
+			    }]
+			});
+			
 			// Create new window and attach grid results into it
 			var winResults = new Ext.Window({
 				id		: 'Query_Result_Window',
@@ -617,7 +660,7 @@ ORYX.Plugins.Query = Clazz.extend({
 		        modal	: true,
 		        resizable	: false,
 				bodyStyle: 'background:#FFFFFF',
-		        items  : [grid],
+		        items  : [panel],
 	            defaultButton: 0,
 		        buttons:[{
 	            	text: ORYX.I18N.Save.close,

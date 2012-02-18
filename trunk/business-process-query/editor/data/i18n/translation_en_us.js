@@ -212,6 +212,7 @@ ORYX.I18N.Query.group = "Query";
 ORYX.I18N.Query.query = "Query";
 ORYX.I18N.Query.queryDesc = "Get partial process recommendation";
 ORYX.I18N.Query.backBtn = "Back";
+ORYX.I18N.Query.selectBtn = "Select";
 ORYX.I18N.Query.queryResultsDesc = "Recommendation results";
 ORYX.I18N.Query.queryDetailsDesc = "Query details";
 ORYX.I18N.Query.queryResultsSVGDesc = "Graphical representation of a similar task";

@@ -110,6 +110,7 @@ ORYX.Plugins.Query = Clazz.extend({
 					    ,triggerAction: 'all'
 					    ,listeners:{
 					       'select': function(){
+					    	   formPanel.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
 			    	   			// get max zone
 					    	   	Ext.Ajax.request({
 						   			url				: prefix+'query/',
@@ -123,6 +124,7 @@ ORYX.Plugins.Query = Clazz.extend({
 														processID: modelMeta.name
 										              },
 						   			success			: function(transport) {
+						   								formPanel.body.unmask();
 						   								var zoneJson = transport.responseText.evalJSON();
 						   								Ext.getCmp('zone').reset();
 						   								var zoneCmp = Ext.getCmp('zone');
@@ -143,6 +145,7 @@ ORYX.Plugins.Query = Clazz.extend({
 						   								zoneCmp.bindStore(zoneStore);
 													  },
 						   			failure			: function(transport) {
+						   									formPanel.body.unmask();
 											   				Ext.getCmp('zone').reset();
 							   								var zoneCmp = Ext.getCmp('zone');
 						   									var zoneStore = new Ext.data.SimpleStore({
@@ -232,6 +235,12 @@ ORYX.Plugins.Query = Clazz.extend({
 		
 		// Create the callback for the template
 		callback = function(form){
+			//remove results window
+			var previousResultsWin = Ext.getCmp('Query_Result_Window');
+       		if(previousResultsWin){
+       			Ext.getCmp('Query_Result_Window').destroy();
+       		}
+			
 			var task = form.findField('task').getValue();
 			var zone = form.findField('zone').getValue();
 			var method = form.findField('method').getValue();
@@ -477,7 +486,12 @@ ORYX.Plugins.Query = Clazz.extend({
 		win.show();
 		
 		var showProcessImg = function(smObj, rowIndex, record) {
-			
+			//remove old recommended process
+			var previousSVG = Ext.getCmp('svg_recommendation_panel');
+       		if(previousSVG){
+       			Ext.getCmp('recommendation_panel').remove(previousSVG);
+       		}
+       		
 			Ext.WindowMgr.get('Query_Result_Window').body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
 			
 			//get SVG from Signavio file
@@ -500,12 +514,12 @@ ORYX.Plugins.Query = Clazz.extend({
 					   				// Create a Template
 					   				var dialog = new Ext.XTemplate(	
 					   						'<div style="width: 900px; height: 400px; overflow:scroll;">',
-						   						'<p style="border-style:solid; border-width:1px; padding:5px; margin:2px; position:absolute; top:3px; left:10px; border-color: #C3C3C3; background-color: #F0F0F0; color:#383838;">',
+						   						'<p id="details_box2" style="display:none; border-style:solid; border-width:1px; padding:5px; margin:2px; position:absolute; top:3px; left:10px; border-color: #C3C3C3; background-color: #F0F0F0; color:#383838;">',
 						   							'Task : {taskName} <br/>',
 						   							'Process : {processID} <br/>',
 						   							'Sim. value : {simValue} <br/>',
 						   						'</p>',
-						   						'<div>' + transport.responseText + '</div>',
+						   						'<div id="svg_box" style="display:none;">' + transport.responseText + '</div>',
 					   						'</div>'
 					   				)
 					   				
@@ -523,22 +537,42 @@ ORYX.Plugins.Query = Clazz.extend({
 					   					frame: true,
 					   		            defaultButton: 0,
 					   						buttons:[{
-					   						text: ORYX.I18N.Query.backBtn,
-					   						handler: function(){
-					   							winSVG.close();
-					   							Ext.WindowMgr.get('Query_Result_Window').show();
-					   						},
-					   						listeners:{
-					   							render:function(){
-					   								this.focus();
-					   							}
-					   						}
-					   					},{
-					   			        	text: ORYX.I18N.Save.close,
-					   			        	handler: function(){
-					   			        		winSVG.close();
-					   			        	}.bind(this)
-					   					}],
+						   			        	text: ORYX.I18N.Query.selectBtn,
+						   			        	handler: function(){
+						   			        		winSVG.close();
+						   			        		var dialogIn = new Ext.XTemplate(	
+										   				'<div id="svg_recommendation_canvas" style="text-align: center; align: center; margin: 0 auto">' + transport.responseText + '</div>'
+									   				)
+						   			        		var panel2 = new Ext.Panel({
+						   			        			id: 'svg_recommendation_panel',
+						   			        			autoScroll: true,
+						   			        			html: dialogIn.apply()
+						   			        		});
+						   			        		
+						   			        		Ext.getCmp('recommendation_panel').collapse(false);
+						   			        		Ext.getCmp('recommendation_panel').add(panel2);
+						   			        		Ext.getCmp('recommendation_panel').doLayout();
+						   			        		Ext.getCmp('recommendation_panel').expand(true);
+						   			        	}.bind(this)
+						   					},{
+						   						text: ORYX.I18N.Query.backBtn,
+						   						handler: function(){
+						   							winSVG.close();
+						   							Ext.WindowMgr.get('Query_Result_Window').show();
+						   							Ext.get("grid_results").fadeIn({ endOpacity: 1, duration: 1});
+						   							Ext.get("details_box1").fadeIn({ endOpacity: 1, duration: 1});
+						   						},
+						   						listeners:{
+						   							render:function(){
+						   								this.focus();
+						   							}
+						   						}
+						   					},{
+						   			        	text: ORYX.I18N.Save.close,
+						   			        	handler: function(){
+						   			        		winSVG.close();
+						   			        	}.bind(this)
+						   					}],
 					   					listeners: {
 					   						close: function(){					
 					   							winSVG.destroy();
@@ -547,6 +581,8 @@ ORYX.Plugins.Query = Clazz.extend({
 					   					}  
 					   			    });
 					   				winSVG.show();
+					   				Ext.get("svg_box").fadeIn({ endOpacity: 1, duration: 1});
+					   				Ext.get("details_box2").slideIn('l', { duration: 1 });
 								  },
 	   			failure			: function(transport) {
 	   								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
@@ -614,11 +650,11 @@ ORYX.Plugins.Query = Clazz.extend({
 			    iconCls: 'icon-grid'
 			});
 			
-			var defaultData1 = {processID:resJSON.task, taskName:resJSON.processID, zone:resJSON.zone, method:resJSON.method}
+			var defaultData1 = {processID:resJSON.processID, taskName:resJSON.task, zone:resJSON.zone, method:resJSON.method}
 				// Create a Template
 			var dialog1 = new Ext.XTemplate(		
 					'<div style="height: 370px; width:250; background-color: #F0F0F0;">',
-						'<p style="padding:5px; margin:2px; color:#383838;">',
+						'<p id="details_box1" style="display:none; padding:5px; margin:2px; color:#383838;">',
 							'Task : {taskName} <br/>',
 							'Process : {processID} <br/>',
 							'Zone : {zone} <br/>',
@@ -636,6 +672,7 @@ ORYX.Plugins.Query = Clazz.extend({
 			    height: 400,
 			    items: [{
 			        title: ORYX.I18N.Query.queryDetailsDesc,
+			        collapseTitle : ORYX.I18N.Query.queryDetailsDesc,
 			        region:'west',
 			        margins: '5 0 0 0',
 			        cmargins: '5 5 0 0',
@@ -677,6 +714,8 @@ ORYX.Plugins.Query = Clazz.extend({
 		    });
 			win.close();
 			winResults.show();
+			Ext.get("grid_results").fadeIn({ endOpacity: 1, duration: 1});
+			Ext.get("details_box1").fadeIn({ endOpacity: 1, duration: 1});
 		}.bind(this);
 	}
 	

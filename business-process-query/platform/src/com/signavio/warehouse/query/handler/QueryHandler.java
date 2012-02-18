@@ -61,8 +61,10 @@ public class QueryHandler extends BasisHandler {
 			parentId = parentId.replace("/directory/", "");
 
 			File fXmlFile = this.openSignavioFile(parentId, token, processID);
-			String svgRepresentation = Process.getSVGRepresentation(fXmlFile);
-			System.out.println(svgRepresentation);
+			Process process = new Process(processID);
+			process.setSvgRepresentation(fXmlFile);
+			process.highlightTargetTaskInSVG(taskName);
+			String svgRepresentation = process.getSvgRepresentation();
 			res.getWriter().write(svgRepresentation);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

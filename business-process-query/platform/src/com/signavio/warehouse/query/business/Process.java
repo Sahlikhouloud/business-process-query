@@ -5,6 +5,7 @@ package com.signavio.warehouse.query.business;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,11 +16,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.signavio.warehouse.query.gateway.AB3CCollectionGateway;
@@ -33,6 +34,17 @@ public class Process {
 
 	// other objects
 	private List<Activity> activities = new ArrayList<Activity>();
+
+	// SVG representation
+	private String svgRepresentation;
+
+	public String getSvgRepresentation() {
+		return svgRepresentation;
+	}
+
+	public void setSvgRepresentation(String svgRepresentation) {
+		this.svgRepresentation = svgRepresentation;
+	}
 
 	public String getProcessID() {
 		return processID;
@@ -888,24 +900,66 @@ public class Process {
 		// alreadyCheck = null;
 	}
 
-	public static String getSVGRepresentation(File fXmlFile){
+	public void highlightTargetTaskInSVG(String taskName) {
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(this.svgRepresentation));
+
+			Document doc = dBuilder.parse(is);
+			NodeList texts = doc.getElementsByTagName("text");
+			for (int i = 0; i < texts.getLength(); i++) {
+				Node nText = texts.item(i);
+				if (nText.getNodeType() == Node.ELEMENT_NODE) {
+					Element eText = (Element) nText;
+					if (eText.getTextContent() != null) {
+						String word = eText.getTextContent();
+						/*
+						 * get hole text from many tspan (each tspan represent
+						 * one line) and remove space and both names and then
+						 * compare!
+						 */
+						if (word.trim().replaceAll(" ", "")
+								.equals(taskName.trim().replaceAll(" ", ""))) {
+							eText.setAttribute("font-weight", "bold");
+							eText.setAttribute("font-style", "italic");
+						}
+					}
+				}
+			}
+			this.setSvgRepresentation(XMLUtil.transformNodeToString(doc
+					.getDocumentElement()));
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void setSvgRepresentation(File fXmlFile) {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		String svgTxt = "";
 		try {
 			dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(fXmlFile);
-			
+
 			// normalize text representation
 			doc.getDocumentElement().normalize();
-			System.out.println("Root element :"
-					+ doc.getDocumentElement().getNodeName());
-			
-			//there is only one svg-representation tag
+			// System.out.println("Root element :"
+			// + doc.getDocumentElement().getNodeName());
+
+			// there is only one svg-representation tag
 			NodeList svg = doc.getElementsByTagName("svg-representation");
 			Node svgXml = svg.item(0);
-			if (svgXml != null
-					&& svgXml.getNodeType() == Node.ELEMENT_NODE) {
+			if (svgXml != null && svgXml.getNodeType() == Node.ELEMENT_NODE) {
 				Element eSvgXml = (Element) svgXml;
 				svgTxt = XMLUtil.getCharacterDataFromElement(eSvgXml);
 			}
@@ -921,9 +975,9 @@ public class Process {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return svgTxt;
+		this.setSvgRepresentation(svgTxt);
 	}
-	
+
 	public String mapXMLfileIntoModel(File fXmlFile) {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
@@ -935,7 +989,7 @@ public class Process {
 			doc.getDocumentElement().normalize();
 			System.out.println("Root element :"
 					+ doc.getDocumentElement().getNodeName());
-			
+
 			// always contain only one process tag
 			NodeList processes = doc.getElementsByTagName("process");
 			Node processXML = processes.item(0);
@@ -1058,7 +1112,7 @@ public class Process {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void removeNeighborsService() {
 		Connection db;
 		try {
@@ -1078,7 +1132,7 @@ public class Process {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void removeNeighborsServiceStatic(String id) {
 		Connection db;
 		try {

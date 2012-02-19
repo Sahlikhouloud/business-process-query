@@ -486,11 +486,7 @@ ORYX.Plugins.Query = Clazz.extend({
 		win.show();
 		
 		var showProcessImg = function(smObj, rowIndex, record) {
-			//remove old recommended process
-			var previousSVG = Ext.getCmp('svg_recommendation_panel');
-       		if(previousSVG){
-       			Ext.getCmp('recommendation_panel').remove(previousSVG);
-       		}
+			
        		
 			Ext.WindowMgr.get('Query_Result_Window').body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
 			
@@ -540,6 +536,13 @@ ORYX.Plugins.Query = Clazz.extend({
 						   			        	text: ORYX.I18N.Query.selectBtn,
 						   			        	handler: function(){
 						   			        		winSVG.close();
+						   			        		
+						   			        		//remove old recommended process
+						   			        		var previousSVG = Ext.getCmp('svg_recommendation_panel');
+						   			        		if(previousSVG){
+						   			        			Ext.getCmp('recommendation_panel').remove(previousSVG);
+						   			        		}
+						   			        		
 						   			        		var dialogIn = new Ext.XTemplate(	
 										   				'<div id="svg_recommendation_canvas" style="text-align: center; align: center; margin: 0 auto">' + transport.responseText + '</div>'
 									   				)

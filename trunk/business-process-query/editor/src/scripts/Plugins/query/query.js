@@ -56,10 +56,12 @@ ORYX.Plugins.Query = Clazz.extend({
 		var reqURI = modelMeta.modelHandler;
 		var reqURIs = reqURI.split("/");
 		var prefix = "/";
+		var canvas = this.facade.getCanvas();
 	    for(i=1; i<reqURIs.length-1; i++){
 		    prefix+=reqURIs[i]+"/";
 	    }
 		var modelJSON = this.facade.getJSON();
+		var facadeObj = this.facade;
 		var canvasChilds  = modelJSON.childShapes;
 		var tasks = [];
 		for(var i=0; i<canvasChilds.length; i++){
@@ -277,210 +279,6 @@ ORYX.Plugins.Query = Clazz.extend({
 				}).bind(this)
 			});
 			
-//			// Create a Template
-//			var dialog = new Ext.XTemplate(		
-//					'<div>',
-//						'<svg xmlns:oryx="http://www.b3mn.org/oryx" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" version="1.0" width="800" height="450">',
-//							//Gateways
-//							'<g> ',
-//							  '<oryx:magnets>',
-//							    '<oryx:magnet ',
-//							       'oryx:default="yes" ',
-//							       'oryx:cy="16" ',
-//							       'oryx:cx="16" /> ',
-//							  '</oryx:magnets>',
-//							  //Parallel  
-//							  '<g>',
-//							    '<defs>',
-//									'<radialGradient id="background" cx="10%" cy="10%" r="100%" fx="10%" fy="10%"> ',
-//										'<stop offset="0%" stop-color="#ffffff" stop-opacity="1"/> ',
-//										'<stop id="fill_el" offset="100%" stop-color="#ffffff" stop-opacity="1"/> ',
-//									'</radialGradient> ',
-//								'</defs> ',
-//							    '<path ',
-//							       'd="M -4.5,16 L 16,-4.5 L 35.5,16 L 16,35.5z" ',
-//							       'id="bg_frame" ',
-//							       'fill="url(#background) white" ',
-//							       'stroke="black" ',
-//							       'style="stroke-width:1" /> ',
-//							    '<path ',
-//							       'd="M 6.75,16 L 25.75,16 M 16,6.75 L 16,25.75" ',
-//							       'id="path9" ',
-//							       'stroke="black" ',
-//							       'style="fill:none;stroke-width:3" /> ',
-//								'<text id="text_name" x="26" y="26" oryx:align="left top"/> ',
-//							  '</g> ',
-//							  
-//							  //Inclusive
-//							  '<g>',
-//							    '<defs>',
-//									'<radialGradient id="background" cx="10%" cy="10%" r="100%" fx="10%" fy="10%">',
-//										'<stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>',
-//										'<stop id="fill_el" offset="100%" stop-color="#ffffff" stop-opacity="1"/>',
-//									'</radialGradient>',
-//								'</defs> ' ,
-//							    '<path ',
-//							       'd="M -4.5,16 L 16,-4.5 L 35.5,16 L 16,35.5z" ',
-//							       'id="bg_frame" ',
-//							       'fill="url(#background) white" ',
-//							       'stroke="black" ',
-//							       'style="stroke-width:1" /> ',
-//							    '<circle ',
-//							    	'id="circle" ',
-//							    	'stroke="black" ',
-//									'cx="16" ',
-//									'cy="16" ',
-//									'r="9.75" ',
-//									'style="fill:none;stroke-width:2.5" />',
-//								'<text id="text_name" x="26" y="26" oryx:align="left top"/>',
-//							  '</g> ',
-//							  //Exclusive
-//							  '<g> ',
-//							    '<defs> ',
-//									'<radialGradient id="background" cx="10%" cy="10%" r="100%" fx="10%" fy="10%"> ',
-//										'<stop offset="0%" stop-color="#ffffff" stop-opacity="1"/> ',
-//										'<stop id="fill_el" offset="100%" stop-color="#ffffff" stop-opacity="1"/> ',
-//									'</radialGradient> ',
-//								'</defs> ',
-//							    '<path ',
-//							       'd="M -4.5,16 L 16,-4.5 L 35.5,16 L 16,35.5z" ',
-//							       'id="bg_frame" ',
-//							       'fill="url(#background) white" ',
-//							       'stroke="black" ',
-//							       'style="stroke-width:1" /> ',
-//							    '<g id="cross"> ',
-//							      '<path ',
-//							      	'id="crosspath" ',
-//							      	'stroke="black" ',
-//							      	'fill="black" ',
-//							        'd="M 8.75,7.55 L 12.75,7.55 L 23.15,24.45 L 19.25,24.45 z" ',
-//							        'style="stroke-width:1" /> ',
-//							      '<path ',
-//							      	'id="crosspath2" ',
-//							      	'stroke="black" ',
-//							      	'fill="black" ',
-//							        'd="M 8.75,24.45 L 19.25,7.55 L 23.15,7.55 L 12.75,24.45 z" ',
-//							        'style="stroke-width:1" /> ',
-//							    '</g> ',
-//								'<text id="text_name" x="26" y="26" oryx:align="left top"/> ',
-//							  '</g> ',
-//							'</g> ', // end gateways
-//							
-//							//Tasks
-//							'<g>',
-//							  '<oryx:magnets>',
-//							  	'<oryx:magnet oryx:cx="1" oryx:cy="20" oryx:anchors="left" />',
-//							  	'<oryx:magnet oryx:cx="1" oryx:cy="40" oryx:anchors="left" />',
-//							  	'<oryx:magnet oryx:cx="1" oryx:cy="60" oryx:anchors="left" />',
-//							  	'<oryx:magnet oryx:cx="25" oryx:cy="79" oryx:anchors="bottom" />',
-//							  	'<oryx:magnet oryx:cx="50" oryx:cy="79" oryx:anchors="bottom" />',
-//							  	'<oryx:magnet oryx:cx="75" oryx:cy="79" oryx:anchors="bottom" />',
-//							  	'<oryx:magnet oryx:cx="99" oryx:cy="20" oryx:anchors="right" />',
-//							  	'<oryx:magnet oryx:cx="99" oryx:cy="40" oryx:anchors="right" />',
-//							  	'<oryx:magnet oryx:cx="99" oryx:cy="60" oryx:anchors="right" />',
-//							  	'<oryx:magnet oryx:cx="25" oryx:cy="1" oryx:anchors="top" />',
-//							  	'<oryx:magnet oryx:cx="50" oryx:cy="1" oryx:anchors="top" />',
-//							  	'<oryx:magnet oryx:cx="75" oryx:cy="1" oryx:anchors="top" />',
-//							  	'<oryx:magnet oryx:cx="50" oryx:cy="40" oryx:default="yes" />',
-//							  '</oryx:magnets>',
-//							  // normal task
-//							  '<g pointer-events="fill" oryx:minimumSize="50 40">',
-//							  	'<defs>',
-//									'<radialGradient id="background" cx="10%" cy="10%" r="100%" fx="10%" fy="10%">',
-//										'<stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>',
-//										'<stop id="fill_el" offset="100%" stop-color="#ffffcc" stop-opacity="1"/>',
-//									'</radialGradient>',
-//								'</defs>',
-//								'<rect id="text_frame" oryx:anchors="bottom top right left" x="1" y="1" width="94" height="79" rx="10" ry="10" stroke="none" stroke-width="0" fill="none" />',
-//							    '<rect id="callActivity" oryx:resize="vertical horizontal" oryx:anchors="bottom top right left" x="0" y="0" width="100" height="80" rx="10" ry="10" stroke="black" stroke-width="4" fill="none" />',
-//								'<rect id="bg_frame" oryx:resize="vertical horizontal" x="0" y="0" width="100" height="80" rx="10" ry="10" stroke="black" stroke-width="1" fill="url(#background) #ffffcc" />',
-//									'<text ', 
-//										'font-size="12" ', 
-//										'id="text_name" ', 
-//										'x="50" ', 
-//										'y="40" ', 
-//										'oryx:align="middle center" ',
-//										'oryx:fittoelem="text_frame" ',
-//										'stroke="black"> ',
-//									'</text> ',
-//							  '</g>',
-//							  
-//							  //sub process
-//							  '<g pointer-events="fill" oryx:minimumSize="80 60">',
-//							  	'<defs>',
-//									'<radialGradient id="background" cx="10%" cy="10%" r="100%" fx="10%" fy="10%">',
-//										'<stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>',
-//										'<stop id="fill_el" offset="100%" stop-color="#ffffcc" stop-opacity="1"/>',
-//									'</radialGradient>',
-//								'</defs>',
-//								'<rect id="text_frame" oryx:anchors="bottom top right left" x="1" y="1" width="94" height="79" rx="10" ry="10" stroke="none" stroke-width="0" fill="none" />',
-//								'<rect id="bg_frame" oryx:anchors="bottom top right left" x="0" y="0" width="100" height="80" rx="10" ry="10" stroke="black" stroke-width="1" fill="url(#background) #ffffcc" />',
-//							    '<rect id="callActivity" oryx:resize="vertical horizontal" oryx:anchors="bottom top right left" x="0" y="0" width="100" height="80" rx="10" ry="10" stroke="black" stroke-width="4" fill="none" />',
-//								'<rect id="border" oryx:anchors="top bottom left right" oryx:resize="vertical horizontal" x="2.5" y="2.5" width="95" height="75" rx="8" ry="8" stroke="black" stroke-width="1" fill="none" />',
-//							    	'<text ',
-//										'font-size="12" ',
-//										'id="text_name" ', 
-//										'x="50" ',
-//										'y="40" ',
-//										'oryx:align="middle center" ',
-//										'oryx:fittoelem="text_frame" ',
-//										'stroke="black">',
-//									'</text>',
-//								 	'<g 	id="b" ',
-//										'oryx:anchors="bottom" ',
-//										'transform="translate(1)">',
-//									 	'<rect id="plusborder" oryx:anchors="bottom" x="43" y="66" width="14" height="14" fill="none" stroke="black" stroke-width="1" />',
-//										'<path id="plus" oryx:anchors="bottom" fill="none" stroke="black" d="M50 68 v10 M 45 73 h10" stroke-width="1"/>',
-//									'</g>',
-//							  '</g>',
-//							'</g>',//end tasks
-//							
-//							//Connectors
-//							'<g class="edge">',
-//								'<defs>',
-//								  	'<marker id="start" refX="1" refY="5" markerUnits="userSpaceOnUse" markerWidth="17" markerHeight="11" orient="auto">',
-//								  		'<path id="conditional"   d="M 0 6 L 8 1 L 15 5 L 8 9 L 1 5" fill="white" stroke="black" stroke-width="1" />',
-//										'<path id="default" d="M 5 0 L 11 10" fill="white" stroke="black" stroke-width="1" />',
-//								  	'</marker>',
-//								  	'<marker id="end" refX="15" refY="6" markerUnits="userSpaceOnUse" markerWidth="15" markerHeight="12" orient="auto">',
-//								  		'<path id="arrowhead" d="M 0 1 L 15 6 L 0 11z" fill="black" stroke="black" stroke-linejoin="round" stroke-width="2" />',
-//								  	'</marker>',
-//								'</defs>',
-//								'<g id="edge">',
-//									'<path id="bg_frame" d="M10 50 L210 50" stroke="black" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-start="url(#start)" marker-end="url(#end)" />',
-//									'<text id="text_name" x="0" y="0" oryx:edgePosition="startTop"/>',
-//								'</g>',
-//							'</g>',
-//						'</svg>',
-//					'</div>'
-//			)
-//			
-//			// Create a new window for results				
-//			var winResults = new Ext.Window({
-//				id		: 'results_window',
-//		        width	: '800',
-//		        height	: '450',
-//			    title	: ORYX.I18N.Query.queryResultsDesc,
-//		        modal	: true,
-//		        resize	: true,
-//				bodyStyle: 'background:#FFFFFF',
-//		        html	: dialog.apply(),
-//		        defaultButton: 0,
-//		        buttons:[{
-//	            	text: ORYX.I18N.Save.close,
-//	            	handler: function(){
-//	            		winResults.close();
-//	            	}.bind(this)
-//				}],
-//				listeners: {
-//					close: function(){					
-//						winResults.destroy();
-//						delete this.saving;
-//					}.bind(this)
-//				}
-//		    });
-//			winResults.show();
-			
 		}.bind(this);
 		
 		win.show();
@@ -504,6 +302,7 @@ ORYX.Plugins.Query = Clazz.extend({
 									parent: modelMeta.parent
 					              },
 	   			success			: function(transport) {
+	   								var SVGTag = transport.responseText;
 	   								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
 					   				Ext.WindowMgr.get('Query_Result_Window').hide();
 					   				var defaultData = {processID:record.get('comparedProcessID').strip(), taskName:record.get('comparedTask').strip(), simValue:record.get('matchingValue') }
@@ -515,7 +314,7 @@ ORYX.Plugins.Query = Clazz.extend({
 						   							'Process : {processID} <br/>',
 						   							'Sim. value : {simValue} <br/>',
 						   						'</p>',
-						   						'<div id="svg_box" style="display:none;">' + transport.responseText + '</div>',
+						   						'<div id="svg_box" style="display:none;">' + SVGTag + '</div>',
 					   						'</div>'
 					   				)
 					   				
@@ -533,35 +332,103 @@ ORYX.Plugins.Query = Clazz.extend({
 					   					frame: true,
 					   		            defaultButton: 0,
 					   						buttons:[{
+						   			        	text: ORYX.I18N.Query.copyBtn,
+						   			        	handler: function(){
+						   			        		winSVG.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
+						   			        		Ext.Ajax.request({
+							   			 	   			url				: prefix+'query/',
+							   			 	   			method			: "GET",
+							   			 	   			timeout			: 1800000,
+							   			 	   			disableCaching	: true,
+							   			 	   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+							   			 	   			params			: {
+							   			 									id: 'getJSON',
+							   			 									task: record.get('comparedTask').strip(),
+							   			 									processID: record.get('comparedProcessID').strip(),
+							   			 									parent: modelMeta.parent
+							   			 					              },
+							   			 	   			success			: function(transport) {
+												   			 	   			winSVG.close();
+												   			        		
+												   			        		//remove old recommended process
+												   			        		var previousSVG = Ext.getCmp('svg_recommendation_panel');
+												   			        		if(previousSVG){
+												   			        			Ext.getCmp('recommendation_panel').remove(previousSVG);
+												   			        		}
+												   			        		
+												   			        		Ext.getCmp('recommendation_panel').collapse(true);
+												   			        		
+												   			        		facadeObj.importJSON(transport.responseText.evalJSON());
+							   			 	   			},failure			: function(transport) {
+							   			 	   				winSVG.close();
+							   			 	   				Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+														}
+						   			        		})
+						   			        	}.bind(this)
+						   					},{
 						   			        	text: ORYX.I18N.Query.selectBtn,
 						   			        	handler: function(){
-						   			        		winSVG.close();
-						   			        		
-						   			        		//remove old recommended process
-						   			        		var previousSVG = Ext.getCmp('svg_recommendation_panel');
-						   			        		if(previousSVG){
-						   			        			Ext.getCmp('recommendation_panel').remove(previousSVG);
-						   			        		}
-						   			        		
-						   			        		var dialogIn = new Ext.XTemplate(	
-										   				'<div id="svg_recommendation_canvas" style="text-align: center; align: center; margin: 0 auto">' + transport.responseText + '</div>'
-									   				)
-						   			        		var panel2 = new Ext.Panel({
-						   			        			id: 'svg_recommendation_panel',
-						   			        			autoScroll: true,
-						   			        			html: dialogIn.apply()
-						   			        		});
-						   			        		
-						   			        		Ext.getCmp('recommendation_panel').collapse(false);
-						   			        		Ext.getCmp('recommendation_panel').add(panel2);
-						   			        		Ext.getCmp('recommendation_panel').doLayout();
-						   			        		Ext.getCmp('recommendation_panel').expand(true);
+						   			        		Ext.Ajax.request({
+							   			 	   			url				: prefix+'query/',
+							   			 	   			method			: "GET",
+							   			 	   			timeout			: 1800000,
+							   			 	   			disableCaching	: true,
+							   			 	   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+							   			 	   			params			: {
+							   			 									id: 'getJSON',
+							   			 									task: record.get('comparedTask').strip(),
+							   			 									processID: record.get('comparedProcessID').strip(),
+							   			 									parent: modelMeta.parent
+							   			 					              },
+							   			 	   			success			: function(transport) {
+												   			 	   			winSVG.close();
+												   			        		
+												   			        		//remove old recommended process
+												   			        		var previousSVG = Ext.getCmp('svg_recommendation_panel');
+												   			        		if(previousSVG){
+												   			        			Ext.getCmp('recommendation_panel').remove(previousSVG);
+												   			        		}
+												   			        		
+												   			        		var dialogIn = new Ext.XTemplate(	
+																   				'<div id="svg_recommendation_canvas" style="text-align: center; align: center; margin: 0 auto">' + SVGTag + '</div>'
+															   				)
+												   			        		var panel2 = new Ext.Panel({
+												   			        			id: 'svg_recommendation_panel',
+												   			        			autoScroll: true,
+												   			        			html: dialogIn.apply()
+												   			        		});
+//												   			        		facadeObj.importJSON(transport.responseText.evalJSON());
+												   			        		var jsonProcess = transport.responseText.evalJSON();
+												   			        		var childEls = [];
+												   			        		for(var i=0; i<jsonProcess.childShapes.length; i++){
+												   			        			childEls.push(jsonProcess.childShapes[i]);
+													   			     	    }
+												   			        		//delete all elements
+												   			        		jsonProcess.childShapes.splice(0,childEls.length);
+												   			        		//add selected elements
+												   			        		for(var i=0; i<childEls.length; i++){
+												   			        			jsonProcess.childShapes.splice(i,0,childEls[i]);
+//												   			        			if(childEls.stencil.id == 'Task' ){
+//												   			        				jsonProcess.childShapes.splice(jsonProcess.childShapes.length,0,childEls[i]);
+//												   			        			}
+													   			     	    }
+//												   			        		facadeObj.importJSON(jsonProcess);
+												   			        		Ext.getCmp('recommendation_panel').collapse(false);
+												   			        		Ext.getCmp('recommendation_panel').add(panel2);
+												   			        		Ext.getCmp('recommendation_panel').doLayout();
+												   			        		Ext.getCmp('recommendation_panel').expand(true);
+							   			 	   			},failure			: function(transport) {
+							   			 	   				winSVG.close();
+							   			 	   				Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+														}
+						   			        		})
 						   			        	}.bind(this)
 						   					},{
 						   						text: ORYX.I18N.Query.backBtn,
 						   						handler: function(){
 						   							winSVG.close();
 						   							Ext.WindowMgr.get('Query_Result_Window').show();
+						   							Ext.getCmp("grid_results").getSelectionModel().deselectRow(rowIndex);
 						   							Ext.get("grid_results").fadeIn({ endOpacity: 1, duration: 1});
 						   							Ext.get("details_box1").fadeIn({ endOpacity: 1, duration: 1});
 						   						},

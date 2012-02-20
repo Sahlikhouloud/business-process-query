@@ -37,6 +37,17 @@ public class Process {
 
 	// SVG representation
 	private String svgRepresentation;
+	
+	//Json representation
+	private String jsonRepresentation;
+
+	public String getJsonRepresentation() {
+		return jsonRepresentation;
+	}
+
+	public void setJsonRepresentation(String jsonRepresentation) {
+		this.jsonRepresentation = jsonRepresentation;
+	}
 
 	public String getSvgRepresentation() {
 		return svgRepresentation;
@@ -943,6 +954,41 @@ public class Process {
 		}
 	}
 
+	public void setJSONRepresentation(File fXmlFile) {
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		String jsonTxt = "";
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(fXmlFile);
+
+			// normalize text representation
+			doc.getDocumentElement().normalize();
+			// System.out.println("Root element :"
+			// + doc.getDocumentElement().getNodeName());
+
+			// there is only one json-representation tag
+			NodeList json = doc.getElementsByTagName("json-representation");
+			Node jsonXml = json.item(0);
+			if (jsonXml != null && jsonXml.getNodeType() == Node.ELEMENT_NODE) {
+				Element eJsonXml = (Element) jsonXml;
+				jsonTxt = XMLUtil.getCharacterDataFromElement(eJsonXml);
+			}
+			// normalize text representation
+			doc.getDocumentElement().normalize();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.setJsonRepresentation(jsonTxt);
+	}
+	
 	public void setSvgRepresentation(File fXmlFile) {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;

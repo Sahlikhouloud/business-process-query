@@ -52,6 +52,31 @@ public class QueryHandler extends BasisHandler {
 			this.getSVG(jParams, res, token);
 		} else if(jobDesc.equals("getJSON")){
 			this.getJSON(jParams, res, token);
+		} else if(jobDesc.equals("getInteractiveSVG")){
+			this.getInteractiveSVG(jParams, res, token);
+		}
+	}
+	
+	private void getInteractiveSVG(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+		try {
+			String processID = jParams.getString("processID");
+			String taskName = jParams.getString("task");
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
+
+			File fXmlFile = this.openSignavioFile(parentId, token, processID);
+			Process process = new Process(processID);
+			process.setSvgRepresentation(fXmlFile);
+			process.highlightTargetTaskInSVG(taskName);
+			process.createInteractiveSvgRepresentation();
+			String svgRepresentation = process.getSvgRepresentation();
+			res.getWriter().write(svgRepresentation);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

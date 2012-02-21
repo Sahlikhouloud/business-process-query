@@ -12,6 +12,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.CharacterData;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -59,5 +60,43 @@ public class XMLUtil {
 			System.out.println("nodeToString Transformer Exception");
 		}
 		return sw.toString();
+	}
+	
+	/**
+	 * 
+	 * @param Document doc
+	 * @return filter element as follwing format
+	 * <filter id="f1" x="0" y="0" width="200%" height="200%">
+	 * 		<feOffset result="offOut" in="SourceAlpha" dx="5" dy="5" />
+	 * 		<feGaussianBlur result="blurOut" in="offOut" stdDeviation="2" />
+	 * 		<feBlend in="SourceGraphic" in2="blurOut" mode="normal" />					   
+	 * </filter>
+	 */
+	public static Element createFilterDefs(Document doc){
+		Element filter = doc.createElement("filter");
+			filter.setAttribute("id", "f1");
+			filter.setAttribute("x", "0");
+			filter.setAttribute("y", "0");
+			filter.setAttribute("width", "200%");
+			filter.setAttribute("height", "200%");
+		Element feOffset = doc.createElement("feOffset");	
+			feOffset.setAttribute("result", "offOut");
+			feOffset.setAttribute("in", "SourceAlpha");
+			feOffset.setAttribute("dx", "20");
+			feOffset.setAttribute("dy", "20");
+		Element feGaussianBlur = doc.createElement("feOffset");	
+			feGaussianBlur.setAttribute("result", "blurOut");
+			feGaussianBlur.setAttribute("in", "offOut");
+			feGaussianBlur.setAttribute("stdDeviation", "10");
+		Element feBlend = doc.createElement("feOffset");	
+			feBlend.setAttribute("mode", "normal");
+			feBlend.setAttribute("in", "SourceGraphic");
+			feBlend.setAttribute("in2", "blurOut");
+		
+		filter.appendChild(feOffset);
+		filter.appendChild(feGaussianBlur);
+		filter.appendChild(feBlend);
+		
+		return filter;
 	}
 }

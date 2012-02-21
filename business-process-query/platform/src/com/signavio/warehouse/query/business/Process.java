@@ -37,8 +37,8 @@ public class Process {
 
 	// SVG representation
 	private String svgRepresentation;
-	
-	//Json representation
+
+	// Json representation
 	private String jsonRepresentation;
 
 	public String getJsonRepresentation() {
@@ -974,8 +974,6 @@ public class Process {
 				Element eJsonXml = (Element) jsonXml;
 				jsonTxt = XMLUtil.getCharacterDataFromElement(eJsonXml);
 			}
-			// normalize text representation
-			doc.getDocumentElement().normalize();
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -988,7 +986,110 @@ public class Process {
 		}
 		this.setJsonRepresentation(jsonTxt);
 	}
-	
+
+	public void createInteractiveSvgRepresentation() {
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(this.svgRepresentation));
+
+			Document doc = dBuilder.parse(is);
+			NodeList svgChilds = doc.getDocumentElement().getChildNodes();
+			
+			for (int i = 0; i < svgChilds.getLength(); i++) {
+				Node nSvgChild = svgChilds.item(i);
+				if (nSvgChild.getNodeType() == Node.ELEMENT_NODE) {
+					Element eSvgChild = (Element) nSvgChild;
+					if (eSvgChild.getNodeName().equals("g")) { // root group
+						NodeList nGRootChilds = eSvgChild.getChildNodes();
+						for (int j = 0; j < nGRootChilds.getLength(); j++) {
+							Node nGRootChild = nGRootChilds.item(j);
+							if (nGRootChild.getNodeType() == Node.ELEMENT_NODE) {
+								Element eRootChild = (Element) nGRootChild;
+								if (eRootChild.getNodeName().equals("g")
+										&& eRootChild.getAttribute("class")
+												.equals("stencils")) {
+									NodeList nStencilChilds = eRootChild
+											.getChildNodes();
+									for (int k = 0; k < nStencilChilds
+											.getLength(); k++) {
+										Node nStencilChild = nStencilChilds
+												.item(k);
+										if (nStencilChild.getNodeType() == Node.ELEMENT_NODE) {
+											Element eStencilChild = (Element) nStencilChild;
+											if (eStencilChild.getNodeName()
+													.equals("g")
+													&& (eStencilChild
+															.getAttribute(
+																	"class")
+															.equals("children") || eStencilChild
+															.getAttribute(
+																	"class")
+															.equals("edge"))) {
+												
+												NodeList nComponents = eStencilChild.getChildNodes();
+												for(int m=0; m<nComponents.getLength(); m++){
+													Node nComponent = nComponents.item(m);
+													if(nComponent.getNodeType() == Node.ELEMENT_NODE){
+														Element eComponent = (Element) nComponent;
+														if(eComponent.getNodeName().equals("g")){
+															// add new attribute into each component (both shapes and edges)
+															String clickRes = "if(this.getAttribute('value') == 0)" +
+																	"{" +
+																		"this.setAttribute('value',1);" +
+																		"this.setAttribute('opacity','0.3');" +
+																		"document.getElementById('selectedSVGCmp').value+=this.id+',';" +
+																	"}" +
+																	"else{" +
+																		"this.setAttribute('value',0);" +
+																		"this.setAttribute('opacity','1');" +
+																		"var ids = document.getElementById('selectedSVGCmp').value.split(',');" +
+																		"var tempIDs = ''; " +
+																		"for(var i=0; i<ids.length-1; i++){" +
+																			"if(this.id != ids[i]){" +
+																				"tempIDs+=ids[i]+',';" +
+																			"}" +
+																		"}" +
+																		"document.getElementById('selectedSVGCmp').value = tempIDs;" +
+																	"}";
+															eComponent.setAttribute("onclick", clickRes);
+															eComponent.setAttribute("onmouseover", "this.style.cursor='pointer';");
+															eComponent.setAttribute("value", "0");
+															eComponent.setAttribute("filter", "");
+														}
+													}
+												}
+											}
+										}
+									}
+									break;
+								}
+							}
+						}
+//					}else if(eSvgChild.getNodeName().equals("defs")){
+//						//add shadow reference
+//						Element filter = XMLUtil.createFilterDefs(doc);
+//						eSvgChild.appendChild(filter);
+					}
+				}
+			}
+
+			this.setSvgRepresentation(XMLUtil.transformNodeToString(doc
+					.getDocumentElement()));
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public void setSvgRepresentation(File fXmlFile) {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
@@ -1009,8 +1110,6 @@ public class Process {
 				Element eSvgXml = (Element) svgXml;
 				svgTxt = XMLUtil.getCharacterDataFromElement(eSvgXml);
 			}
-			// normalize text representation
-			doc.getDocumentElement().normalize();
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

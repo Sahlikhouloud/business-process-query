@@ -41,9 +41,10 @@ import com.signavio.platform.security.business.FsSecurityManager;
 import com.signavio.warehouse.directory.business.FsDirectory;
 import com.signavio.warehouse.exceptions.EncodingException;
 import com.signavio.warehouse.model.business.FsModel;
+import com.signavio.warehouse.query.business.Process;
+import com.signavio.warehouse.query.business.ProcessQuery;
 import com.signavio.warehouse.revision.business.FsModelRevision;
 import com.signavio.warehouse.revision.business.RepresentationType;
-import com.signavio.warehouse.query.business.Process;
 
 /**
  * Concrete implementation to get all information from a model
@@ -232,6 +233,7 @@ public class ModelHandler extends BasisHandler {
 		//add delete model for query plugin (Actually, should request from JS to doDelete in QueryHandler but JS is in one line version)
 		Process.deleteByProcessIDStatic(model.getName());
 		Process.removeNeighborsServiceStatic(model.getName());
+		ProcessQuery.deleteByProcessIDStatic(model.getName());
 		
 		FsSecurityManager.getInstance().deleteObject(model, token);
 	}	

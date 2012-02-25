@@ -41,6 +41,16 @@ public class Process {
 	// Json representation
 	private String jsonRepresentation;
 
+	private int noOfQuery;
+
+	public int getNoOfQuery() {
+		return noOfQuery;
+	}
+
+	public void setNoOfQuery(int noOfQuery) {
+		this.noOfQuery = noOfQuery;
+	}
+
 	public String getJsonRepresentation() {
 		return jsonRepresentation;
 	}
@@ -997,7 +1007,7 @@ public class Process {
 
 			Document doc = dBuilder.parse(is);
 			NodeList svgChilds = doc.getDocumentElement().getChildNodes();
-			
+
 			for (int i = 0; i < svgChilds.getLength(); i++) {
 				Node nSvgChild = svgChilds.item(i);
 				if (nSvgChild.getNodeType() == Node.ELEMENT_NODE) {
@@ -1028,36 +1038,57 @@ public class Process {
 															.getAttribute(
 																	"class")
 															.equals("edge"))) {
-												
-												NodeList nComponents = eStencilChild.getChildNodes();
-												for(int m=0; m<nComponents.getLength(); m++){
-													Node nComponent = nComponents.item(m);
-													if(nComponent.getNodeType() == Node.ELEMENT_NODE){
+
+												NodeList nComponents = eStencilChild
+														.getChildNodes();
+												for (int m = 0; m < nComponents
+														.getLength(); m++) {
+													Node nComponent = nComponents
+															.item(m);
+													if (nComponent
+															.getNodeType() == Node.ELEMENT_NODE) {
 														Element eComponent = (Element) nComponent;
-														if(eComponent.getNodeName().equals("g")){
-															// add new attribute into each component (both shapes and edges)
-															String clickRes = "if(this.getAttribute('value') == 0)" +
-																	"{" +
-																		"this.setAttribute('value',1);" +
-																		"this.setAttribute('opacity','0.3');" +
-																		"document.getElementById('selectedSVGCmp').value+=this.id+',';" +
-																	"}" +
-																	"else{" +
-																		"this.setAttribute('value',0);" +
-																		"this.setAttribute('opacity','1');" +
-																		"var ids = document.getElementById('selectedSVGCmp').value.split(',');" +
-																		"var tempIDs = ''; " +
-																		"for(var i=0; i<ids.length-1; i++){" +
-																			"if(this.id != ids[i]){" +
-																				"tempIDs+=ids[i]+',';" +
-																			"}" +
-																		"}" +
-																		"document.getElementById('selectedSVGCmp').value = tempIDs;" +
-																	"}";
-															eComponent.setAttribute("onclick", clickRes);
-															eComponent.setAttribute("onmouseover", "this.style.cursor='pointer';");
-															eComponent.setAttribute("value", "0");
-															eComponent.setAttribute("filter", "");
+														if (eComponent
+																.getNodeName()
+																.equals("g")) {
+															// add new attribute
+															// into each
+															// component (both
+															// shapes and edges)
+															String clickRes = "if(this.getAttribute('value') == 0)"
+																	+ "{"
+																	+ "this.setAttribute('value',1);"
+																	+ "this.setAttribute('opacity','0.3');"
+																	+ "document.getElementById('selectedSVGCmp').value+=this.id+',';"
+																	+ "}"
+																	+ "else{"
+																	+ "this.setAttribute('value',0);"
+																	+ "this.setAttribute('opacity','1');"
+																	+ "var ids = document.getElementById('selectedSVGCmp').value.split(',');"
+																	+ "var tempIDs = ''; "
+																	+ "for(var i=0; i<ids.length-1; i++){"
+																	+ "if(this.id != ids[i]){"
+																	+ "tempIDs+=ids[i]+',';"
+																	+ "}"
+																	+ "}"
+																	+ "document.getElementById('selectedSVGCmp').value = tempIDs;"
+																	+ "}";
+															eComponent
+																	.setAttribute(
+																			"onclick",
+																			clickRes);
+															eComponent
+																	.setAttribute(
+																			"onmouseover",
+																			"this.style.cursor='pointer';");
+															eComponent
+																	.setAttribute(
+																			"value",
+																			"0");
+															eComponent
+																	.setAttribute(
+																			"filter",
+																			"");
 														}
 													}
 												}
@@ -1068,10 +1099,10 @@ public class Process {
 								}
 							}
 						}
-//					}else if(eSvgChild.getNodeName().equals("defs")){
-//						//add shadow reference
-//						Element filter = XMLUtil.createFilterDefs(doc);
-//						eSvgChild.appendChild(filter);
+						// }else if(eSvgChild.getNodeName().equals("defs")){
+						// //add shadow reference
+						// Element filter = XMLUtil.createFilterDefs(doc);
+						// eSvgChild.appendChild(filter);
 					}
 				}
 			}
@@ -1296,5 +1327,23 @@ public class Process {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void setNoOfQuery(File[] files) {
+		int max = 0;
+		for (int i = 0; i < files.length; i++) {
+			File file = files[i];
+			if (file.isFile()) {
+				String fileName = file.getName();
+				String[] nameFragments = fileName.split("\\.");
+				if (!fileName.equals("")
+						&& nameFragments[0].equals(this.processID)
+						&& nameFragments[1].equals("query")
+						&& Integer.parseInt(nameFragments[2]) > max) {
+					max = Integer.parseInt(nameFragments[2]);
+				}
+			}
+		}
+		this.setNoOfQuery(max);
 	}
 }

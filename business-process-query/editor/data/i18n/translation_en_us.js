@@ -214,6 +214,8 @@ ORYX.I18N.Query.queryDesc = "Get partial process recommendation";
 ORYX.I18N.Query.backBtn = "Back";
 ORYX.I18N.Query.selectBtn = "Show";
 ORYX.I18N.Query.copyBtn = "Copy";
+ORYX.I18N.Query.copyCmpBtn = "Copy components";
+ORYX.I18N.Query.copyAllBtn = "Copy process";
 ORYX.I18N.Query.queryResultsDesc = "Recommendation results";
 ORYX.I18N.Query.queryDetailsDesc = "Query details";
 ORYX.I18N.Query.queryResultsSVGDesc = "Graphical representation of a similar task";
@@ -224,13 +226,16 @@ ORYX.I18N.Query.zone = "k-zone number";
 ORYX.I18N.Query.threshold = "Similarity threshold";
 ORYX.I18N.Query.targetTask = "Target task";
 ORYX.I18N.Query.method = "Weighting method";
-ORYX.I18N.Query.queryBtn = "Get recommendation";
+ORYX.I18N.Query.queryBtn = "Execute";
+ORYX.I18N.Query.modifyBtn = "Modify query";
 
 ORYX.I18N.Query.shareFailure = "There was an exception during sharing a process!";
 ORYX.I18N.Query.syntaxFailure = "Cannot share a process containing syntax error!";
 ORYX.I18N.Query.getFailure = "There was an exception during getting a recommendation!";
 ORYX.I18N.Query.getSVGFailure = "Cannot find process named";
 ORYX.I18N.Query.exception = "There was an exception";
+ORYX.I18N.Query.getFileException = "There was an exception during generate query name";
+ORYX.I18N.Query.saveQeuryexception = "There was an exception during create a query";
 
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 

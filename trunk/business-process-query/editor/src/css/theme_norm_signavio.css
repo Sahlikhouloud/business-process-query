@@ -220,6 +220,9 @@ text * {
 .x-panel-editor-east .x-panel-body {
 	background:#F1F1F1 url(../../explorer/src/img/signavio/bgr_right.png) repeat-y -1px center;
 }
+.x-panel-editor-south .x-panel-body{
+	background-color:#F1F1F1;	
+}
 
 .LoadingIndicator {
 	background-image: url('../../libs/ext-2.0.2/resources/images/default/grid/loading.gif');

@@ -15,10 +15,10 @@ import com.signavio.platform.annotations.HandlerConfiguration;
 import com.signavio.platform.handler.BasisHandler;
 import com.signavio.platform.security.business.FsAccessToken;
 import com.signavio.platform.security.business.FsSecureBusinessObject;
-import com.signavio.platform.security.business.FsSecurityManager;
-import com.signavio.warehouse.directory.business.FsDirectory;
 import com.signavio.warehouse.query.business.Process;
+import com.signavio.warehouse.query.business.ProcessQuery;
 import com.signavio.warehouse.query.business.ProcessZone;
+import com.signavio.warehouse.query.util.FileUtil;
 import com.signavio.warehouse.query.util.IConstant;
 
 @HandlerConfiguration(uri = "/query", rel = "que")
@@ -54,7 +54,28 @@ public class QueryHandler extends BasisHandler {
 			this.getJSON(jParams, res, token);
 		} else if(jobDesc.equals("getInteractiveSVG")){
 			this.getInteractiveSVG(jParams, res, token);
+		} else if(jobDesc.equals("getNoOfQuery")){
+			this.getNoOfQuery(jParams, res, token);
 		}
+	}
+	
+	private void getNoOfQuery(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+		try {
+			String processID = jParams.getString("processID");
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
+			File [] files = FileUtil.getFilesInDir(parentId, token);
+			Process process = new Process(processID);
+			process.setNoOfQuery(files);
+			res.getWriter().write(process.getNoOfQuery()+"");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private void getInteractiveSVG(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
@@ -64,7 +85,7 @@ public class QueryHandler extends BasisHandler {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = this.openSignavioFile(parentId, token, processID);
+			File fXmlFile = FileUtil.openSignavioFile(parentId, token, processID);
 			Process process = new Process(processID);
 			process.setSvgRepresentation(fXmlFile);
 			process.highlightTargetTaskInSVG(taskName);
@@ -87,7 +108,7 @@ public class QueryHandler extends BasisHandler {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = this.openSignavioFile(parentId, token, processID);
+			File fXmlFile = FileUtil.openSignavioFile(parentId, token, processID);
 			Process process = new Process(processID);
 			process.setSvgRepresentation(fXmlFile);
 			process.highlightTargetTaskInSVG(taskName);
@@ -109,7 +130,7 @@ public class QueryHandler extends BasisHandler {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = this.openSignavioFile(parentId, token, processID);
+			File fXmlFile = FileUtil.openSignavioFile(parentId, token, processID);
 			Process process = new Process(processID);
 			process.setJSONRepresentation(fXmlFile);
 			String jsonRepresentation = process.getJsonRepresentation();
@@ -190,12 +211,43 @@ public class QueryHandler extends BasisHandler {
 		System.out.println("QueryHandler... doPost ");
 		// Get the parameter list
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
+		String jobDesc = "";
+		try {
+			jobDesc = jParams.getString("jobId");
+		} catch (JSONException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		if(jobDesc.equals("newProcess")){
+			this.newProcess(jParams, res, token);
+		}else if(jobDesc.equals("newQuery")){
+			this.newQuery(jParams);
+		}
+	}
+	
+	private void newQuery(JSONObject jParams){
+		try {
+			String processID = jParams.getString("processID");
+			int zone = jParams.getInt("zone");
+			String targetProcess = jParams.getString("targetProcess");
+			String targetTask = jParams.getString("targetTask");
+			String desc = jParams.getString("queryDesc");
+			ProcessQuery query = new ProcessQuery(processID, targetProcess, targetTask, zone, desc);
+			query.saveQuery();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void newProcess(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
 		try {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
 
-			File fXmlFile = this.openBpmn20File(parentId, token, name);
+			File fXmlFile = FileUtil.openBpmn20File(parentId, token, name);
 
 			Process process = new Process(name);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
@@ -228,7 +280,7 @@ public class QueryHandler extends BasisHandler {
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
 
-			File fXmlFile = this.openBpmn20File(parentId, token, name);
+			File fXmlFile = FileUtil.openBpmn20File(parentId, token, name);
 
 			Process process = new Process(name);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
@@ -237,7 +289,6 @@ public class QueryHandler extends BasisHandler {
 			} else {
 				if (jParams.has("id")) {
 					String id = jParams.getString("id");
-					System.out.println("ID : " + id);
 					boolean isNewProcess = this.deletePreviousProcess(id);
 					if (isNewProcess) {
 						process.deleteByProcessID();
@@ -254,24 +305,6 @@ public class QueryHandler extends BasisHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	private File openBpmn20File(String parentId, FsAccessToken token, String name) {
-
-		FsDirectory dir = FsSecurityManager.getInstance().loadObject(
-				FsDirectory.class, parentId, token);
-		String path = dir.getPath() + "/" + name + ".bpmn20.xml";
-
-		return new File(path);
-	}
-	
-	private File openSignavioFile(String parentId, FsAccessToken token, String name) {
-
-		FsDirectory dir = FsSecurityManager.getInstance().loadObject(
-				FsDirectory.class, parentId, token);
-		String path = dir.getPath() + "/" + name + ".signavio.xml";
-
-		return new File(path);
 	}
 
 	private boolean deletePreviousProcess(String id) {

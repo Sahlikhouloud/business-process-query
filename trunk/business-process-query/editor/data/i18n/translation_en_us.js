@@ -210,15 +210,22 @@ if(!ORYX.I18N.Query) ORYX.I18N.Query = {};
 
 ORYX.I18N.Query.group = "Query";
 ORYX.I18N.Query.query = "Query";
-ORYX.I18N.Query.queryDesc = "Get partial process recommendation";
+ORYX.I18N.Query.queryAltDesc = "Get a referent process based on current process fragment  (Ctrl+Q)";
+ORYX.I18N.Query.queryDesc = "Specify your query";
+ORYX.I18N.Query.newQuery = "New query";
+ORYX.I18N.Query.newQueryAltDesc = "Get a referent process based on a new query process fragment  (Ctrl+Alt+Q)";
+ORYX.I18N.Query.newQueryDesc = "Create new query";
 ORYX.I18N.Query.backBtn = "Back";
 ORYX.I18N.Query.selectBtn = "Show";
 ORYX.I18N.Query.copyBtn = "Copy";
 ORYX.I18N.Query.copyCmpBtn = "Copy components";
 ORYX.I18N.Query.copyAllBtn = "Copy process";
+ORYX.I18N.Query.openNewWindowBtn = "Open new window";
+ORYX.I18N.Query.openNewTabBtn = "Open new tab";
 ORYX.I18N.Query.queryResultsDesc = "Recommendation results";
 ORYX.I18N.Query.queryDetailsDesc = "Query details";
 ORYX.I18N.Query.queryResultsSVGDesc = "Graphical representation of a similar task";
+ORYX.I18N.Query.createdNewQueryDesc = "A new query process is stored under";
 
 ORYX.I18N.Query.dialogDesciption = "Please specify your query";
 ORYX.I18N.Query.pleaseWait = "Processing";
@@ -227,7 +234,7 @@ ORYX.I18N.Query.threshold = "Similarity threshold";
 ORYX.I18N.Query.targetTask = "Target task";
 ORYX.I18N.Query.method = "Weighting method";
 ORYX.I18N.Query.queryBtn = "Execute";
-ORYX.I18N.Query.modifyBtn = "Modify query";
+ORYX.I18N.Query.modifyBtn = "Create a query";
 
 ORYX.I18N.Query.shareFailure = "There was an exception during sharing a process!";
 ORYX.I18N.Query.syntaxFailure = "Cannot share a process containing syntax error!";

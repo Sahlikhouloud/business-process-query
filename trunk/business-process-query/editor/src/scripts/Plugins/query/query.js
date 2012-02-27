@@ -1,5 +1,5 @@
 /** Copyright (c) 2011
- * new plug in for querying similar activities
+ * new plug in for querying similar activities based on only current design
  * created by Nattawat Nonsung 
  * armmer1@gmail.com
 */
@@ -20,14 +20,14 @@ ORYX.Plugins.Query = Clazz.extend({
 		// Offers the functionality of undo                
         this.facade.offer({
 			name			: ORYX.I18N.Query.query,
-			description		: ORYX.I18N.Query.queryDesc,
+			description		: ORYX.I18N.Query.queryAltDesc,
 			icon			: ORYX.PATH + "images/query.png",
-//			keyCodes: [{
-//					metaKeys: [ORYX.CONFIG.META_KEY_META_CTRL],
-//					keyCode: 90,
-//					keyAction: ORYX.CONFIG.KEY_ACTION_DOWN
-//				}
-//		 	],
+			keyCodes: [{
+					metaKeys: [ORYX.CONFIG.META_KEY_META_CTRL],
+					keyCode: 81, //q key-code
+					keyAction: ORYX.CONFIG.KEY_ACTION_DOWN
+				}
+		 	],
 			functionality	: this.querying.bind(this),
 			group			: ORYX.I18N.Query.group,
 			isEnabled		: function(){ return true }.bind(this),
@@ -90,9 +90,6 @@ ORYX.Plugins.Query = Clazz.extend({
 		var ss = this.facade.getStencilSets().values()[0]
 		
 		var typeTitle = ss.title();
-		
-		// Define Default values
-		var defaultData = {title:Signavio.Utils.escapeHTML(name||""), summary:Signavio.Utils.escapeHTML(modelMeta.description||""), type:typeTitle, url: reqURI, namespace: modelMeta.model.stencilset.namespace, comment: '' }
 		
 		// Create form
 		var methods = [
@@ -217,15 +214,6 @@ ORYX.Plugins.Query = Clazz.extend({
 	        items  : [formPanel],
             defaultButton: 0,
 				buttons:[{
-					text: ORYX.I18N.Query.modifyBtn,
-					handler: function(){
-							win.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
-							
-							window.setTimeout(function(){
-								duplicateProcess(formPanel.getForm());
-							}.bind(this), 10);
-					}
-				},{
 					text: ORYX.I18N.Query.queryBtn,
 					handler: function(){
 				
@@ -255,206 +243,6 @@ ORYX.Plugins.Query = Clazz.extend({
 				}.bind(this)
 			}  
 	    });
-		
-		// for modifying query ---> create new .query file (refer to save as function - in file.js)
-		duplicateProcess = function(form){
-			var queryName;
-			var json = modelJSON;
-			var glossary = [];
-			var sendSaveRequest = this.sendSaveRequest.bind(this);
-			//Support for glossary
-			if (this.facade.hasGlossaryExtension) {
-				
-				Ext.apply(json, ORYX.Core.AbstractShape.JSONHelper);
-				var allNodes = json.getChildShapes(true);
-				
-				var orders = {};
-				
-				this.facade.getGlossary().each(function(entry){
-					if ("undefined" == typeof orders[entry.shape.resourceId+"-"+entry.property.prefix()+"-"+entry.property.id()]){
-						orders[entry.shape.resourceId+"-"+entry.property.prefix()+"-"+entry.property.id()] = 0;
-					}
-					// Add entry
-					glossary.push({
-						itemId		: entry.glossary,
-		            	elementId	: entry.shape.resourceId,
-		            	propertyId	: entry.property.prefix()+"-"+entry.property.id(),
-			            order		: orders[entry.shape.resourceId+"-"+entry.property.prefix()+"-"+entry.property.id()]++
-					});
-					
-					// Replace SVG
-					if (entry.property.refToView() && entry.property.refToView().length > 0) {
-						entry.property.refToView().each(function(ref){
-							var node = $(entry.shape.id+""+ref);
-							if (node)
-								node.setAttribute("oryx:glossaryIds", entry.glossary + ";")
-						})
-					}
-				}.bind(this))
-
-				// Set the json as string
-				json = json.serialize();
-
-			} else {
-				json = Ext.encode(json);
-			}
-			// Set the glossaries as string
-			glossary = Ext.encode(glossary);
-			
-			var selection = this.facade.getSelection();
-			this.facade.setSelection([]);
-
-			// Get the serialized svg image source
-	        var svgClone 	= this.facade.getCanvas().getSVGRepresentation(true);
-			this.facade.setSelection(selection);
-	        if (this.facade.getCanvas().properties["oryx-showstripableelements"] === false) {
-	        	var stripOutArray = svgClone.getElementsByClassName("stripable-element");
-	        	for (var i=stripOutArray.length-1; i>=0; i--) {
-	        		stripOutArray[i].parentNode.removeChild(stripOutArray[i]);
-	        	}
-	        }
-			  
-			// Remove all forced stripable elements 
-        	var stripOutArray = svgClone.getElementsByClassName("stripable-element-force");
-        	for (var i=stripOutArray.length-1; i>=0; i--) {
-        		stripOutArray[i].parentNode.removeChild(stripOutArray[i]);
-        	}
-			          
-			// Parse dom to string
-	        var svgDOM 	= DataManager.serialize(svgClone);
-	        var ss = this.facade.getStencilSets().values()[0];
-	        
-	        var successFn = function(transport) {
-	        	//insert into query description table
-	        	var task = form.findField('task').getValue();
-				var zone = form.findField('zone').getValue();
-	        	new Ajax.Request(prefix+'query/', {
-		            method: 'post',
-		            asynchronous: true,
-					requestHeaders: {
-						"Accept":"application/json"
-					},
-					parameters: {
-						jobId: 'newQuery',
-						processID: queryName,
-						zone: zone,
-						targetProcess: modelMeta.name,
-						targetTask: task,
-						queryDesc: ""
-		            },
-					encoding: 'UTF-8',
-					onSuccess: function(transport){
-					},
-					onException: function(){
-						Ext.WindowMgr.get('Query_Window').close();  
-						Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.saveQeuryexception).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-					}.bind(this),
-					onFailure: (function(transport) {
-						Ext.WindowMgr.get('Query_Window').close();  
-						Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.saveQeuryexception).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-					}).bind(this)
-	        	});
-	        	
-	        	var loc = transport.getResponseHeader.location;
-				if (!this.processURI && loc) {
-					this.processURI = loc;
-				}
-				
-				// create new window
-				var resJSON = transport.responseText.evalJSON();
-				
-				var modelURL = location.href.substring(0, location.href.indexOf(location.search)) + '?id=' + resJSON.href.substring(7);
-				var newURLWin = new Ext.Window({
-					title:		ORYX.I18N.Save.savedAs, 
-					bodyStyle:	"background:white;padding:10px", 
-					width:		'auto', 
-					height:		'auto',
-					html:"<div style='font-weight:bold;margin-bottom:10px'>"+ORYX.I18N.Save.savedDescription+":</div><span><a href='" + modelURL +"' target='_blank'>" + modelURL + "</a></span>",
-					buttons:[{text:'Ok',handler:function(){newURLWin.destroy()}}]
-				});
-				newURLWin.show();
-				
-				window.open(modelURL);
-
-				Ext.WindowMgr.get('Query_Window').close();
-				
-				delete this.saving;
-				
-			}.bind(this);
-			
-			var failure = function(transport) {
-				// raise loading disable event.
-                this.facade.raiseEvent({
-                    type: ORYX.CONFIG.EVENT_LOADING_DISABLE
-                });
-                	
-                Ext.WindowMgr.get('Query_Window').close();                	
-				
-				if(transport.status && transport.status === 401) {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				} else if(transport.status && transport.status === 403) {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				} else if(transport.statusText === "transaction aborted") {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				} else if(transport.statusText === "communication failure") {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				} else {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				}
-				
-				delete this.saving;
-				
-			}.bind(this);
-			
-			new Ajax.Request(prefix+'query/', {
-	            method: 'get',
-	            asynchronous: true,
-				requestHeaders: {
-					"Accept":"application/json"
-				},
-				parameters: {
-					id: 'getNoOfQuery',
-					processID: modelMeta.name,
-					parent: modelMeta.parent
-	            },
-				encoding: 'UTF-8',
-				onSuccess: function(transport){
-					queryName = modelMeta.name+".query"+"."+(parseInt(transport.responseText)+1);
-			        var params = {
-			        		json_xml: json,
-			        		svg_xml: svgDOM,
-			        		name: queryName,
-			        		type: ss.title(),
-			        		parent: modelMeta.parent,
-			        		description: "",
-			        		comment: "",
-			        		glossary_xml: glossary,
-			        		namespace: modelMeta.namespace,
-			        		views: Ext.util.JSON.encode(modelMeta.views || [])
-			        };
-			        
-			        //create a query as a new process + insert query desc table
-					sendSaveRequest('POST', reqURI, params, successFn, failure);
-				},
-				onException: function(){
-					Ext.WindowMgr.get('Query_Window').close();  
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFileException).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				}.bind(this),
-				onFailure: (function(transport) {
-					Ext.WindowMgr.get('Query_Window').close();  
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFileException).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				}).bind(this),
-				on401: (function(transport) {
-					Ext.WindowMgr.get('Query_Window').close();  
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFileException).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				}).bind(this),
-				on403: (function(transport) {
-					Ext.WindowMgr.get('Query_Window').close();  
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFileException).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-				}).bind(this)
-			});
-			
-		}.bind(this);
 		
 		// Create the callback for the template
 		callback = function(form){

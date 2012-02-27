@@ -83,6 +83,10 @@ public class Process {
 		this.activities.add(activity);
 	}
 
+	public Process(){
+		
+	}
+	
 	public Process(String processID) { // Use JAVA to get source and target
 		this.processID = processID;
 		// ResultSet rs = null;

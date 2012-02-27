@@ -48,26 +48,25 @@ public class QueryHandler extends BasisHandler {
 			this.getRecommendation(jParams, res);
 		} else if (jobDesc.equals("getMaxZone")) {
 			this.getMaxZone(jParams, res);
-		} else if(jobDesc.equals("getSVG")){
+		} else if (jobDesc.equals("getSVG")) {
 			this.getSVG(jParams, res, token);
-		} else if(jobDesc.equals("getJSON")){
+		} else if (jobDesc.equals("getJSON")) {
 			this.getJSON(jParams, res, token);
-		} else if(jobDesc.equals("getInteractiveSVG")){
+		} else if (jobDesc.equals("getInteractiveSVG")) {
 			this.getInteractiveSVG(jParams, res, token);
-		} else if(jobDesc.equals("getNoOfQuery")){
+		} else if (jobDesc.equals("getNoOfQuery")) {
 			this.getNoOfQuery(jParams, res, token);
+		} else if (jobDesc.equals("getInitQuery")) {
+			this.getInitQuery(jParams, res);
 		}
 	}
-	
-	private void getNoOfQuery(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+
+	private void getInitQuery(JSONObject jParams, HttpServletResponse res) {
 		try {
 			String processID = jParams.getString("processID");
-			String parentId = jParams.getString("parent");
-			parentId = parentId.replace("/directory/", "");
-			File [] files = FileUtil.getFilesInDir(parentId, token);
-			Process process = new Process(processID);
-			process.setNoOfQuery(files);
-			res.getWriter().write(process.getNoOfQuery()+"");
+			ProcessQuery query = ProcessQuery.getProcessQuery(processID);
+			JSONObject queryJSON = query.exportJSON();
+			res.getWriter().write(queryJSON.toString());
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -75,17 +74,38 @@ public class QueryHandler extends BasisHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-	
-	private void getInteractiveSVG(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+
+	private void getNoOfQuery(JSONObject jParams, HttpServletResponse res,
+			FsAccessToken token) {
+		try {
+			String processID = jParams.getString("processID");
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
+			File[] files = FileUtil.getFilesInDir(parentId, token);
+			Process process = new Process(processID);
+			process.setNoOfQuery(files);
+			res.getWriter().write(process.getNoOfQuery() + "");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void getInteractiveSVG(JSONObject jParams, HttpServletResponse res,
+			FsAccessToken token) {
 		try {
 			String processID = jParams.getString("processID");
 			String taskName = jParams.getString("task");
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = FileUtil.openSignavioFile(parentId, token, processID);
+			File fXmlFile = FileUtil.openSignavioFile(parentId, token,
+					processID);
 			Process process = new Process(processID);
 			process.setSvgRepresentation(fXmlFile);
 			process.highlightTargetTaskInSVG(taskName);
@@ -100,15 +120,17 @@ public class QueryHandler extends BasisHandler {
 			e.printStackTrace();
 		}
 	}
-	
-	private void getSVG(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+
+	private void getSVG(JSONObject jParams, HttpServletResponse res,
+			FsAccessToken token) {
 		try {
 			String processID = jParams.getString("processID");
 			String taskName = jParams.getString("task");
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = FileUtil.openSignavioFile(parentId, token, processID);
+			File fXmlFile = FileUtil.openSignavioFile(parentId, token,
+					processID);
 			Process process = new Process(processID);
 			process.setSvgRepresentation(fXmlFile);
 			process.highlightTargetTaskInSVG(taskName);
@@ -122,15 +144,17 @@ public class QueryHandler extends BasisHandler {
 			e.printStackTrace();
 		}
 	}
-	
-	private void getJSON(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+
+	private void getJSON(JSONObject jParams, HttpServletResponse res,
+			FsAccessToken token) {
 		try {
 			String processID = jParams.getString("processID");
-//			String taskName = jParams.getString("task");
+			// String taskName = jParams.getString("task");
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = FileUtil.openSignavioFile(parentId, token, processID);
+			File fXmlFile = FileUtil.openSignavioFile(parentId, token,
+					processID);
 			Process process = new Process(processID);
 			process.setJSONRepresentation(fXmlFile);
 			String jsonRepresentation = process.getJsonRepresentation();
@@ -143,18 +167,18 @@ public class QueryHandler extends BasisHandler {
 			e.printStackTrace();
 		}
 	}
-	
-	private void getMaxZone(JSONObject jParams, HttpServletResponse res){
+
+	private void getMaxZone(JSONObject jParams, HttpServletResponse res) {
 		try {
 			JSONArray jsons = new JSONArray();
 			String processID = jParams.getString("processID");
 			String taskName = jParams.getString("task");
 			ProcessZone process = new ProcessZone(processID);
 			int zone = process.getTask(taskName).getNoOfZone();
-			for(int i=1; i<=zone; i++){
+			for (int i = 1; i <= zone; i++) {
 				JSONObject json = new JSONObject();
-					json.put("myId", i);
-					json.put("myText", i);
+				json.put("myId", i);
+				json.put("myText", i);
 				jsons.put(json);
 			}
 			JSONObject root = new JSONObject();
@@ -168,7 +192,7 @@ public class QueryHandler extends BasisHandler {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void getRecommendation(JSONObject jParams, HttpServletResponse res) {
 		try {
 			JSONObject json = new JSONObject();
@@ -218,30 +242,32 @@ public class QueryHandler extends BasisHandler {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
-		if(jobDesc.equals("newProcess")){
+
+		if (jobDesc.equals("saveProcess")) {
 			this.newProcess(jParams, res, token);
-		}else if(jobDesc.equals("newQuery")){
+		} else if (jobDesc.equals("newQuery")) {
 			this.newQuery(jParams);
 		}
 	}
-	
-	private void newQuery(JSONObject jParams){
+
+	private void newQuery(JSONObject jParams) {
 		try {
 			String processID = jParams.getString("processID");
 			int zone = jParams.getInt("zone");
 			String targetProcess = jParams.getString("targetProcess");
 			String targetTask = jParams.getString("targetTask");
 			String desc = jParams.getString("queryDesc");
-			ProcessQuery query = new ProcessQuery(processID, targetProcess, targetTask, zone, desc);
+			ProcessQuery query = new ProcessQuery(processID, targetProcess,
+					targetTask, zone, desc);
 			query.saveQuery();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	private void newProcess(JSONObject jParams, HttpServletResponse res, FsAccessToken token){
+
+	private void newProcess(JSONObject jParams, HttpServletResponse res,
+			FsAccessToken token) {
 		try {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
@@ -275,6 +301,34 @@ public class QueryHandler extends BasisHandler {
 		System.out.println("QueryHandler... doPut ");
 		// Get the parameter list
 		JSONObject jParams = (JSONObject) req.getAttribute("params");
+		String jobDesc = "";
+		try {
+			jobDesc = jParams.getString("jobId");
+		} catch (JSONException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
+		if (jobDesc.equals("saveProcess")) {
+			this.updateProcess(jParams, res, token);
+		}else if(jobDesc.equals("updateQueryInitStatus")){
+			this.updateQUeryInitStatus(jParams);
+		}
+	}
+
+	private void updateQUeryInitStatus(JSONObject jParams){
+		try {
+			String processID = jParams.getString("processID");
+			ProcessQuery query = ProcessQuery.getProcessQuery(processID);
+			query.finishInitQuery();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void updateProcess(JSONObject jParams, HttpServletResponse res,
+			FsAccessToken token) {
 		try {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");

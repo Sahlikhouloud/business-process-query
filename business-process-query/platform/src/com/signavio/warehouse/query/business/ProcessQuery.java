@@ -1,7 +1,11 @@
 package com.signavio.warehouse.query.business;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.signavio.warehouse.query.gateway.QueryDetailsGateway;
 import com.signavio.warehouse.query.gateway.util.BaseGateway;
@@ -13,6 +17,7 @@ public class ProcessQuery extends Process{
 	private int zone;
 	private String queryDesc;
 	private int queryNo;
+	private boolean isInitiated;
 	
 	public ProcessQuery(String processID, String targetProcess, String targetTask, int zone, String queryDesc) {
 		super(processID);
@@ -23,12 +28,24 @@ public class ProcessQuery extends Process{
 		this.extractQueryNo();
 		// TODO Auto-generated constructor stub
 	}
-
 	
+	public ProcessQuery(){
+		
+	}
+	
+	public boolean isInitiated() {
+		return isInitiated;
+	}
+
+
+	public void setInitiated(boolean isInitiated) {
+		this.isInitiated = isInitiated;
+	}
+
+
 	public int getQueryNo() {
 		return queryNo;
 	}
-
 
 	public void setQueryNo(int queryNo) {
 		this.queryNo = queryNo;
@@ -107,6 +124,7 @@ public class ProcessQuery extends Process{
 		try {
 			db = BaseGateway.getConnection();
 			QueryDetailsGateway.deleteQuery(db, processID);
+			db.close();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -121,4 +139,78 @@ public class ProcessQuery extends Process{
 			e.printStackTrace();
 		}
 	}
+	
+	public static ProcessQuery getProcessQuery(String processID){
+		Connection db;
+		ProcessQuery query = null;
+		try {
+			db = BaseGateway.getConnection();
+			ResultSet rs = QueryDetailsGateway.findByID(db, processID);
+			if(rs.next()){
+				query = new ProcessQuery();
+				query.setProcessID(processID);
+				query.setTargetProcess(rs.getString("target_process"));
+				query.setQueryNo(rs.getInt("query_no"));
+				query.setTargetTask(rs.getString("target_task"));
+				query.setZone(rs.getInt("zone"));
+				query.setQueryDesc(rs.getString("description"));
+				query.setInitiated(rs.getBoolean("is_initiated"));
+			}
+			rs.close();
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return query;
+	}
+	
+	public void finishInitQuery(){
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			QueryDetailsGateway.updateInitStatus(db, true, this.getProcessID());
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public JSONObject exportJSON(){
+		JSONObject queryJSON = new JSONObject();
+		try {
+			queryJSON.put("processID", this.getProcessID());
+			queryJSON.put("targetTask", this.getTargetTask());
+			queryJSON.put("targetProcess", this.getTargetProcess());
+			queryJSON.put("zone", this.getZone());
+			queryJSON.put("desc", this.getQueryDesc());
+			queryJSON.put("queryNo", this.getQueryNo());
+			queryJSON.put("isInitiated", this.isInitiated());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return queryJSON;
+	}
 }
+
+

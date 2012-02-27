@@ -234,8 +234,10 @@ ORYX.I18N.Query.syntaxFailure = "Cannot share a process containing syntax error!
 ORYX.I18N.Query.getFailure = "There was an exception during getting a recommendation!";
 ORYX.I18N.Query.getSVGFailure = "Cannot find process named";
 ORYX.I18N.Query.exception = "There was an exception";
-ORYX.I18N.Query.getFileException = "There was an exception during generate query name";
-ORYX.I18N.Query.saveQeuryexception = "There was an exception during create a query";
+ORYX.I18N.Query.getFileException = "There was an exception during generating a query name";
+ORYX.I18N.Query.saveQeuryexception = "There was an exception during creating a query";
+ORYX.I18N.Query.initQueryFailure = "There was an exception during initiating a query";
+ORYX.I18N.Query.updateInitStatusFailure = "There was an exception updating init status of a query";
 
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 

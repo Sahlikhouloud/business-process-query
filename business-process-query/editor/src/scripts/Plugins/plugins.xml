@@ -34,6 +34,10 @@
 			<requires namespace="http://b3mn.org/stencilset/bpmn1.1#" />
 			<requires namespace="http://b3mn.org/stencilset/bpmn2.0#" />
 		</plugin>
+		<plugin source="query/newQuery.js" name="ORYX.Plugins.NewQuery">
+			<requires namespace="http://b3mn.org/stencilset/bpmn1.1#" />
+			<requires namespace="http://b3mn.org/stencilset/bpmn2.0#" />
+		</plugin>
 		<!-- End: query similar activities plugins -->
 
 		<!-- following plugins don't require Ext -->

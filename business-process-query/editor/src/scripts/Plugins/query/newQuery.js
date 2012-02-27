@@ -391,6 +391,18 @@ ORYX.Plugins.NewQuery = Clazz.extend({
 		}.bind(this);
 		
 		win.show();
+		
+		//Check selected obj, in case one task is selected then put task's name into form
+		var selectedObjs = this.facade.getSelection();
+		if(selectedObjs.length==1){
+			var obj = selectedObjs[0].toJSON();
+			if(obj.stencil.id == 'Task' || obj.stencil.id == 'CollapsedSubprocess'){
+				var taskCmp = Ext.getCmp('task');
+				taskCmp.setValue(obj.properties.name.strip());
+				taskCmp.fireEvent('select');
+			}
+		}
+		
 	},
 	
 	sendSaveRequest: function(method, url, params, success, failure){

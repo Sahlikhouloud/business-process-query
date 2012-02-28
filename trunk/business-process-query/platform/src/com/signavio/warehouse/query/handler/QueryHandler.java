@@ -328,22 +328,30 @@ public class QueryHandler extends BasisHandler {
 			if (!exception.equals("") && exception != null) {
 				res.getWriter().write(exception);
 			} else {
-				if (jParams.has("id")) {
-					String id = jParams.getString("id");
-					boolean isNewProcess = this.deletePreviousProcess(id);
-					if (isNewProcess) {
-						process.deleteByProcessID();
-						process.removeNeighborsService();
+				//for query process update init Status every time it is saved
+				if(process.isQueryProcess()){
+					if (jParams.has("id")) {
+						String id = jParams.getString("id");
+						boolean isNewProcess = Process.deletePreviousQueryProcess(id);
+						if (isNewProcess) {
+							process.deleteByProcessID();
+							process.removeNeighborsService();
+						}
+					}
+					ProcessQuery query = ProcessQuery.getProcessQuery(name);
+					query.finishInitQuery();
+				}else { // for ordinary process
+					if (jParams.has("id")) {
+						String id = jParams.getString("id");
+						boolean isNewProcess = Process.deletePreviousProcess(id);
+						if (isNewProcess) {
+							process.deleteByProcessID();
+							process.removeNeighborsService();
+						}
 					}
 				}
 				process.persist();
 				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
-				
-				//for query process update init Status every time it is saved
-				if(process.isQueryProcess()){
-					ProcessQuery query = ProcessQuery.getProcessQuery(name);
-					query.finishInitQuery();
-				}
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -353,18 +361,4 @@ public class QueryHandler extends BasisHandler {
 			e.printStackTrace();
 		}
 	}
-
-	private boolean deletePreviousProcess(String id) {
-		boolean isNewProcess = false;
-		String[] ids = id.split(";");
-		if (ids.length > 1) {
-			String realID = ids[ids.length - 1].split("\\.")[0];
-			Process.deleteByProcessIDStatic(realID);
-			Process.removeNeighborsServiceStatic(realID);
-		} else {
-			isNewProcess = true;
-		}
-		return isNewProcess;
-	}
-
 }

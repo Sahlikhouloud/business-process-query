@@ -1359,4 +1359,31 @@ public class Process {
 			return false;
 		}
 	}
+	
+	public static boolean deletePreviousProcess(String id) {
+		boolean isNewProcess = false;
+		String[] ids = id.split(";");
+		if (ids.length > 1) {
+			String realID = ids[ids.length - 1].split("\\.")[0];
+			Process.deleteByProcessIDStatic(realID);
+			Process.removeNeighborsServiceStatic(realID);
+		} else {
+			isNewProcess = true;
+		}
+		return isNewProcess;
+	}
+	
+	public static boolean deletePreviousQueryProcess(String id) {
+		boolean isNewProcess = false;
+		String[] ids = id.split(";");
+		if (ids.length > 1) {
+			String [] nameFragments = ids[ids.length - 1].split("\\.");
+			String realID = nameFragments[0]+"."+nameFragments[1]+"."+nameFragments[2];
+			Process.deleteByProcessIDStatic(realID);
+			Process.removeNeighborsServiceStatic(realID);
+		} else {
+			isNewProcess = true;
+		}
+		return isNewProcess;
+	}
 }

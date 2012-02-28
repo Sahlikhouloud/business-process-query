@@ -83,10 +83,10 @@ public class Process {
 		this.activities.add(activity);
 	}
 
-	public Process(){
-		
+	public Process() {
+
 	}
-	
+
 	public Process(String processID) { // Use JAVA to get source and target
 		this.processID = processID;
 		// ResultSet rs = null;
@@ -1349,5 +1349,14 @@ public class Process {
 			}
 		}
 		this.setNoOfQuery(max);
+	}
+
+	public boolean isQueryProcess() {
+		String[] nameFragments = this.processID.split("\\.");
+		if (nameFragments.length > 1 && nameFragments[1].equals("query")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

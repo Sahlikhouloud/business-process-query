@@ -234,7 +234,7 @@ ORYX.I18N.Query.threshold = "Similarity threshold";
 ORYX.I18N.Query.targetTask = "Target task";
 ORYX.I18N.Query.method = "Weighting method";
 ORYX.I18N.Query.queryBtn = "Execute";
-ORYX.I18N.Query.modifyBtn = "Create a query";
+ORYX.I18N.Query.modifyBtn = "Create query";
 
 ORYX.I18N.Query.shareFailure = "There was an exception during sharing a process!";
 ORYX.I18N.Query.syntaxFailure = "Cannot share a process containing syntax error!";

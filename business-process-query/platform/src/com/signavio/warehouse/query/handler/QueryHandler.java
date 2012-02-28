@@ -311,22 +311,9 @@ public class QueryHandler extends BasisHandler {
 
 		if (jobDesc.equals("saveProcess")) {
 			this.updateProcess(jParams, res, token);
-		}else if(jobDesc.equals("updateQueryInitStatus")){
-			this.updateQUeryInitStatus(jParams);
 		}
 	}
 
-	private void updateQUeryInitStatus(JSONObject jParams){
-		try {
-			String processID = jParams.getString("processID");
-			ProcessQuery query = ProcessQuery.getProcessQuery(processID);
-			query.finishInitQuery();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 	private void updateProcess(JSONObject jParams, HttpServletResponse res,
 			FsAccessToken token) {
 		try {
@@ -351,6 +338,12 @@ public class QueryHandler extends BasisHandler {
 				}
 				process.persist();
 				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
+				
+				//for query process update init Status every time it is saved
+				if(process.isQueryProcess()){
+					ProcessQuery query = ProcessQuery.getProcessQuery(name);
+					query.finishInitQuery();
+				}
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

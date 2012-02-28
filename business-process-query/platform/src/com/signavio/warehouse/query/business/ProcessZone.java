@@ -387,7 +387,10 @@ public class ProcessZone {
 
 		for (int i = 0; i < processIDs.size(); i++) {
 			ProcessZone comparedProcess = new ProcessZone(processIDs.get(i));
-			comparedProcesses.add(comparedProcess);
+			//no include query process
+			if(!comparedProcess.isQueryProcess()){
+				comparedProcesses.add(comparedProcess);
+			}
 		}
 		this.computeMatchingValue(comparedProcesses, fromZone, toZone,
 				consideringZoneWeight, considerSimOfGateway, targetTaskID);
@@ -558,5 +561,14 @@ public class ProcessZone {
 			}
 		}
 		return jsons;
+	}
+	
+	public boolean isQueryProcess() {
+		String[] nameFragments = this.processID.split("\\.");
+		if (nameFragments.length > 1 && nameFragments[1].equals("query")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

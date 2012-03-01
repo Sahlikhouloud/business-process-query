@@ -226,6 +226,8 @@ ORYX.I18N.Query.queryResultsDesc = "Recommendation results";
 ORYX.I18N.Query.queryDetailsDesc = "Query details";
 ORYX.I18N.Query.queryResultsSVGDesc = "Graphical representation of a similar task";
 ORYX.I18N.Query.createdNewQueryDesc = "A new query process is stored under";
+ORYX.I18N.Query.inputTabDesc = "Queries";
+ORYX.I18N.Query.outputTabDesc = "Results";
 
 ORYX.I18N.Query.dialogDesciption = "Please specify your query";
 ORYX.I18N.Query.pleaseWait = "Processing";

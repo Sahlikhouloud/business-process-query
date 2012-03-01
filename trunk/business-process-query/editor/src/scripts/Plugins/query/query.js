@@ -75,371 +75,372 @@ ORYX.Plugins.Query = Clazz.extend({
 	 * 
 	 */
 	querying: function(){
-		
-		var modelMeta = this.facade.getModelMetaData();
-		var reqURI = modelMeta.modelHandler;
-		var reqURIs = reqURI.split("/");
-		var prefix = "/";
-	    for(i=1; i<reqURIs.length-1; i++){
-		    prefix+=reqURIs[i]+"/";
-	    }
-		var modelJSON = this.facade.getJSON();
-		var canvasChilds  = modelJSON.childShapes;
-		var tasks = [];
-		for(var i=0; i<canvasChilds.length; i++){
-		    if(canvasChilds[i].stencil.id == 'Task' || canvasChilds[i].stencil.id == 'CollapsedSubprocess'){
-		    	tasks.push(canvasChilds[i].properties.name);
+		if(!this.isQueryProcess(this.facade.getModelMetaData().name)){
+			var modelMeta = this.facade.getModelMetaData();
+			var reqURI = modelMeta.modelHandler;
+			var reqURIs = reqURI.split("/");
+			var prefix = "/";
+		    for(i=1; i<reqURIs.length-1; i++){
+			    prefix+=reqURIs[i]+"/";
 		    }
-	    }
-		
-		var taskTxt = "[";
-		for(i=0; i<tasks.length; i++){
-			taskTxt+="['"+tasks[i].strip()+"', '"+tasks[i].strip()+"'],";
-	    }
-		taskTxt = taskTxt.substring(0,taskTxt.length-1)+"]";
-		
-		// Get the stencilset
-		var ss = this.facade.getStencilSets().values()[0]
-		
-		var typeTitle = ss.title();
-		
-		// Create form
-		var methods = [
-		                [2, 'Levenstein']
-		               ,[4, 'Improved weight']
-		           ];
-		var formPanel = new Ext.form.FormPanel({
-			id		: 'query_model',
-			bodyStyle:'padding:10px',
-	        width	: 'auto',
-	        height	: 'auto',
-            items:[ 
-                     new Ext.form.ComboBox({
-                    	fieldLabel: ORYX.I18N.Query.targetTask,
-                    	name: 'task',
-                    	id: 'task',
-                    	store: new Ext.data.SimpleStore({
-   					    	fields:['myId', 'myText'],
-   					        data:eval(taskTxt)
-   					    })
-                     	,allowBlank:false
-                     	,autoWidth:true
-                     	,emptyText: '-- select --'
-   					    ,valueField:'myId'
-					    ,displayField:'myText'
-					    ,mode:'local'
-					    ,triggerAction: 'all'
-					    ,listeners:{
-					       'select': function(){
-					    	   formPanel.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
-			    	   			// get max zone
-					    	   	Ext.Ajax.request({
-						   			url				: prefix+'query/',
-						   			method			: "GET",
-						   			timeout			: 1800000,
-						   			disableCaching	: true,
-						   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
-						   			params			: {
-														id: 'getMaxZone',
-														task: this.getValue().strip(),
-														processID: modelMeta.name
-										              },
-						   			success			: function(transport) {
-						   								formPanel.body.unmask();
-						   								var zoneJson = transport.responseText.evalJSON();
-						   								Ext.getCmp('zone').reset();
-						   								var zoneCmp = Ext.getCmp('zone');
-						   								var rt = Ext.data.Record.create([
-						   								    {name: 'myId'},
-						   								    {name: 'myText'}
-						   								]);
-						   								var zoneStore = new Ext.data.Store ({
-						   									isAutoLoad: true,
-						   								    reader: new Ext.data.JsonReader({
-						   								    	root: 'zone',
-							   								    fields: [
-							   								        {name: 'myId', mapping: 'myId'},
-							   								        {name: 'myText', mapping: 'myText'}
-							   								    ]},rt)
-						   								})
-						   								zoneStore.loadData(zoneJson);
-						   								zoneCmp.bindStore(zoneStore);
-													  },
-						   			failure			: function(transport) {
-						   									formPanel.body.unmask();
-											   				Ext.getCmp('zone').reset();
-							   								var zoneCmp = Ext.getCmp('zone');
-						   									var zoneStore = new Ext.data.SimpleStore({
-									   					    	fields:['myId', 'myText'],
-									   					        data:[['1','1'],['2','2'],['3','3'],['4','4'],['5','5']]
-									   					    })
-						   									zoneCmp.bindStore(zoneStore);
-													  }
-						   		})
-				    	   	}
-					    }
-                     }),
-                     new Ext.form.ComboBox({
-                    	fieldLabel: ORYX.I18N.Query.zone,
-                    	name: 'zone',
-                    	id: 'zone',
-                     	store: new Ext.data.SimpleStore({
-   					    	fields:['myId', 'myText'],
-   					        data:[]
-   					    })
-                     	,allowBlank:false
-                     	,emptyText: '-- select --'
-   					    ,valueField:'myId'
- 					    ,displayField:'myText'
- 					    ,mode:'local'
- 					    ,triggerAction: 'all'
-                      }),
-                      new Ext.form.ComboBox({
-                    	fieldLabel: ORYX.I18N.Query.method,
-                    	name: 'method',
-                    	id: 'method',
-   					    store: new Ext.data.SimpleStore({
-   					    	fields:['myId', 'myText'],
-   					        data:methods
-   					    })
-                      	,allowBlank:false
-                      	,emptyText: '-- select --'
-   					    ,valueField:'myId'
-   					    ,displayField:'myText'
-   					    ,mode:'local'
-   					    ,triggerAction: 'all'
-                      })
-            ] 
-		});
-		
-		
-		
-		// Create new window and attach form into it
-		var win = new Ext.Window({
-	        id		: 'Query_Window',
-	        width	: 'auto',
-	        height	: 'auto',
-		    title	: ORYX.I18N.Query.queryDesc,
-	        modal	: true,
-	        resizable	: false,
-			bodyStyle: 'background:#FFFFFF',
-	        items  : [formPanel],
-            defaultButton: 0,
-				buttons:[{
-					text: ORYX.I18N.Query.queryBtn,
-					handler: function(){
-				
-					win.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
-					
-					window.setTimeout(function(){
-						
-						callback(formPanel.getForm());
-						
-					}.bind(this), 10);			
-				},
-				listeners:{
-					render:function(){
-						this.focus();
-					}
-				}
-			},{
-	        	text: ORYX.I18N.Save.close,
-	        	handler: function(){
-	               win.close();
-	        	}.bind(this)
-			}],
-			listeners: {
-				close: function(){					
-	            	win.destroy();
-					delete this.saving;
-				}.bind(this)
-			}  
-	    });
-		
-		// Create the callback for the template
-		callback = function(form){
-			//remove results window
-			var previousResultsWin = Ext.getCmp('Query_Result_Window');
-       		if(previousResultsWin){
-       			Ext.getCmp('Query_Result_Window').destroy();
-       		}
+			var modelJSON = this.facade.getJSON();
+			var canvasChilds  = modelJSON.childShapes;
+			var tasks = [];
+			for(var i=0; i<canvasChilds.length; i++){
+			    if(canvasChilds[i].stencil.id == 'Task' || canvasChilds[i].stencil.id == 'CollapsedSubprocess'){
+			    	tasks.push(canvasChilds[i].properties.name);
+			    }
+		    }
 			
-			var task = form.findField('task').getValue();
-			var zone = form.findField('zone').getValue();
-			var method = form.findField('method').getValue();
-			new Ajax.Request(prefix+'query/', {
-	            method: 'get',
-	            asynchronous: true,
-				requestHeaders: {
-					"Accept":"application/json"
-				},
-				parameters: {
-					id: 'getRecommendation',
-					task: task,
-					zone: zone,
-					method: method,
-					processID: modelMeta.name
-	            },
-				encoding: 'UTF-8',
-				onSuccess: successQuery,
-				onException: function(){
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-					win.close();
-				}.bind(this),
-				onFailure: (function(transport) {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-					win.close();
-				}).bind(this),
-				on401: (function(transport) {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-					win.close();
-				}).bind(this),
-				on403: (function(transport) {
-					Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-					win.close();
-				}).bind(this)
-			});
+			var taskTxt = "[";
+			for(i=0; i<tasks.length; i++){
+				taskTxt+="['"+tasks[i].strip()+"', '"+tasks[i].strip()+"'],";
+		    }
+			taskTxt = taskTxt.substring(0,taskTxt.length-1)+"]";
 			
-		}.bind(this);
-		
-		win.show();
-		
-		//Check selected obj, in case one task is selected then put task's name into form
-		var selectedObjs = this.facade.getSelection();
-		if(selectedObjs.length==1){
-			var obj = selectedObjs[0].toJSON();
-			if(obj.stencil.id == 'Task' || obj.stencil.id == 'CollapsedSubprocess'){
-				var taskCmp = Ext.getCmp('task');
-				taskCmp.setValue(obj.properties.name.strip());
-				taskCmp.fireEvent('select');
-			}
-		}
-		
-		var showProcessImg = this.showProcessImg.bind(this);
-		
-		var successQuery = function(transport) {
-			var resJSON = transport.responseText.evalJSON();
-			var rt = Ext.data.Record.create([
-			    {name: 'comparedTask'},
-			    {name: 'comparedProcessID'},
-			    {name: 'matchingValue'}
-			])
-			var resultStore = new Ext.data.Store ({
-				isAutoLoad: true,
-			    reader: new Ext.data.JsonReader({
-			    	root: 'results',
-				    fields: [
-				        {name: 'comparedTask', mapping: 'comparedTask'},
-				        {name: 'comparedProcessID', mapping: 'comparedProcessID'},
-				        {name: 'matchingValue', mapping: 'matchingValue'}
-				    ]},rt)
-			})
+			// Get the stencilset
+			var ss = this.facade.getStencilSets().values()[0]
 			
-			resultStore.loadData(resJSON);
+			var typeTitle = ss.title();
 			
-			var grid = new Ext.grid.GridPanel({
-				id:	'grid_results',
-			    store: resultStore,
-			    autoScroll: true,
-			    colModel: new Ext.grid.ColumnModel({
-			    	defaultSortable: true,
-			    	defaults: {
-			            sortable: true
-			        },
-			        columns: [
-			            {id: 'similarTask', width: 10, header: 'Similar tasks', dataIndex: 'comparedTask', type:'string', 
-			            	renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
-//			            		metaData.attr = 'ext:qtip="' + value + '"';
-			            		return value;
-			            	}
-			            },
-			            {id: 'processID', width: 10, header: 'ProcessID', dataIndex: 'comparedProcessID', type:'string'},
-			            {id: 'similarValue', width: 10, header: 'Similarity value', dataIndex: 'matchingValue', type:'float'},
-		            ]
-			    }),
-			    viewConfig: {
-			        forceFit: true,
-			    },
-			    sm: new Ext.grid.RowSelectionModel({
-	                singleSelect: true,
-	                listeners: {
-	                     rowselect: showProcessImg
-	               }
-	            }),
-			    width: 800,
-			    height: 400,
-			    frame: true,
-			    layout: 'fit',
-			    iconCls: 'icon-grid'
-			});
-			
-			var defaultData1 = {processID:resJSON.processID, taskName:resJSON.task, zone:resJSON.zone, method:resJSON.method}
-				// Create a Template
-			var dialog1 = new Ext.XTemplate(		
-					'<div style="height: 370px; width:250; background-color: #F0F0F0;">',
-						'<p id="details_box1" style="display:none; padding:5px; margin:2px; color:#383838;">',
-							'Task : {taskName} <br/>',
-							'Process : {processID} <br/>',
-							'Zone : {zone} <br/>',
-							'Method : {method} <br/>',
-						'</p>',
-					'</div>'
-			)
-			var panel = new Ext.Panel({
-			    layout:'border',
-			    defaults: {
-			        collapsible: true,
-			        split: true
-			    },
-			    width: 800,
-			    height: 400,
-			    items: [{
-			        title: ORYX.I18N.Query.queryDetailsDesc,
-			        collapseTitle : ORYX.I18N.Query.queryDetailsDesc,
-			        region:'west',
-			        margins: '5 0 0 0',
-			        cmargins: '5 5 0 0',
-			        width: 175,
-			        minSize: 100,
-			        maxSize: 250,
-			        html: dialog1.apply(defaultData1)
-			    },{
-			    	collapsible: false,
-			        region:'center',
-			        margins: '5 0 0 0',
-			        items: [grid]
-			    }]
-			});
-			
-			// Create new window and attach grid results into it
-			var winResults = new Ext.Window({
-				id		: 'Query_Result_Window',
+			// Create form
+			var methods = [
+			                [2, 'Levenstein']
+			               ,[4, 'Improved weight']
+			           ];
+			var formPanel = new Ext.form.FormPanel({
+				id		: 'query_model',
+				bodyStyle:'padding:10px',
 		        width	: 'auto',
 		        height	: 'auto',
-			    title	: ORYX.I18N.Query.queryResultsDesc,
+	            items:[ 
+	                     new Ext.form.ComboBox({
+	                    	fieldLabel: ORYX.I18N.Query.targetTask,
+	                    	name: 'task',
+	                    	id: 'task',
+	                    	store: new Ext.data.SimpleStore({
+	   					    	fields:['myId', 'myText'],
+	   					        data:eval(taskTxt)
+	   					    })
+	                     	,allowBlank:false
+	                     	,autoWidth:true
+	                     	,emptyText: '-- select --'
+	   					    ,valueField:'myId'
+						    ,displayField:'myText'
+						    ,mode:'local'
+						    ,triggerAction: 'all'
+						    ,listeners:{
+						       'select': function(){
+						    	   formPanel.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
+				    	   			// get max zone
+						    	   	Ext.Ajax.request({
+							   			url				: prefix+'query/',
+							   			method			: "GET",
+							   			timeout			: 1800000,
+							   			disableCaching	: true,
+							   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+							   			params			: {
+															id: 'getMaxZone',
+															task: this.getValue().strip(),
+															processID: modelMeta.name
+											              },
+							   			success			: function(transport) {
+							   								formPanel.body.unmask();
+							   								var zoneJson = transport.responseText.evalJSON();
+							   								Ext.getCmp('zone').reset();
+							   								var zoneCmp = Ext.getCmp('zone');
+							   								var rt = Ext.data.Record.create([
+							   								    {name: 'myId'},
+							   								    {name: 'myText'}
+							   								]);
+							   								var zoneStore = new Ext.data.Store ({
+							   									isAutoLoad: true,
+							   								    reader: new Ext.data.JsonReader({
+							   								    	root: 'zone',
+								   								    fields: [
+								   								        {name: 'myId', mapping: 'myId'},
+								   								        {name: 'myText', mapping: 'myText'}
+								   								    ]},rt)
+							   								})
+							   								zoneStore.loadData(zoneJson);
+							   								zoneCmp.bindStore(zoneStore);
+														  },
+							   			failure			: function(transport) {
+							   									formPanel.body.unmask();
+												   				Ext.getCmp('zone').reset();
+								   								var zoneCmp = Ext.getCmp('zone');
+							   									var zoneStore = new Ext.data.SimpleStore({
+										   					    	fields:['myId', 'myText'],
+										   					        data:[['1','1'],['2','2'],['3','3'],['4','4'],['5','5']]
+										   					    })
+							   									zoneCmp.bindStore(zoneStore);
+														  }
+							   		})
+					    	   	}
+						    }
+	                     }),
+	                     new Ext.form.ComboBox({
+	                    	fieldLabel: ORYX.I18N.Query.zone,
+	                    	name: 'zone',
+	                    	id: 'zone',
+	                     	store: new Ext.data.SimpleStore({
+	   					    	fields:['myId', 'myText'],
+	   					        data:[]
+	   					    })
+	                     	,allowBlank:false
+	                     	,emptyText: '-- select --'
+	   					    ,valueField:'myId'
+	 					    ,displayField:'myText'
+	 					    ,mode:'local'
+	 					    ,triggerAction: 'all'
+	                      }),
+	                      new Ext.form.ComboBox({
+	                    	fieldLabel: ORYX.I18N.Query.method,
+	                    	name: 'method',
+	                    	id: 'method',
+	   					    store: new Ext.data.SimpleStore({
+	   					    	fields:['myId', 'myText'],
+	   					        data:methods
+	   					    })
+	                      	,allowBlank:false
+	                      	,emptyText: '-- select --'
+	   					    ,valueField:'myId'
+	   					    ,displayField:'myText'
+	   					    ,mode:'local'
+	   					    ,triggerAction: 'all'
+	                      })
+	            ] 
+			});
+			
+			
+			
+			// Create new window and attach form into it
+			var win = new Ext.Window({
+		        id		: 'Query_Window',
+		        width	: 'auto',
+		        height	: 'auto',
+			    title	: ORYX.I18N.Query.queryDesc,
 		        modal	: true,
 		        resizable	: false,
 				bodyStyle: 'background:#FFFFFF',
-		        items  : [panel],
+		        items  : [formPanel],
 	            defaultButton: 0,
-		        buttons:[{
-	            	text: ORYX.I18N.Save.close,
-	            	handler: function(){
-	            		winResults.close();
-	            	}.bind(this)
+					buttons:[{
+						text: ORYX.I18N.Query.queryBtn,
+						handler: function(){
+					
+						win.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
+						
+						window.setTimeout(function(){
+							
+							callback(formPanel.getForm());
+							
+						}.bind(this), 10);			
+					},
+					listeners:{
+						render:function(){
+							this.focus();
+						}
+					}
+				},{
+		        	text: ORYX.I18N.Save.close,
+		        	handler: function(){
+		               win.close();
+		        	}.bind(this)
 				}],
 				listeners: {
 					close: function(){					
-						winResults.destroy();
+		            	win.destroy();
 						delete this.saving;
 					}.bind(this)
-				}
+				}  
 		    });
-			win.close();
-			winResults.show();
-			Ext.get("grid_results").fadeIn({ endOpacity: 1, duration: 1});
-			Ext.get("details_box1").fadeIn({ endOpacity: 1, duration: 1});
-		}.bind(this);
+			
+			// Create the callback for the template
+			callback = function(form){
+				//remove results window
+				var previousResultsWin = Ext.getCmp('Query_Result_Window');
+	       		if(previousResultsWin){
+	       			Ext.getCmp('Query_Result_Window').destroy();
+	       		}
+				
+				var task = form.findField('task').getValue();
+				var zone = form.findField('zone').getValue();
+				var method = form.findField('method').getValue();
+				new Ajax.Request(prefix+'query/', {
+		            method: 'get',
+		            asynchronous: true,
+					requestHeaders: {
+						"Accept":"application/json"
+					},
+					parameters: {
+						id: 'getRecommendation',
+						task: task,
+						zone: zone,
+						method: method,
+						processID: modelMeta.name
+		            },
+					encoding: 'UTF-8',
+					onSuccess: successQuery,
+					onException: function(){
+						Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+						win.close();
+					}.bind(this),
+					onFailure: (function(transport) {
+						Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+						win.close();
+					}).bind(this),
+					on401: (function(transport) {
+						Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+						win.close();
+					}).bind(this),
+					on403: (function(transport) {
+						Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getFailure).setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+						win.close();
+					}).bind(this)
+				});
+				
+			}.bind(this);
+			
+			win.show();
+			
+			//Check selected obj, in case one task is selected then put task's name into form
+			var selectedObjs = this.facade.getSelection();
+			if(selectedObjs.length==1){
+				var obj = selectedObjs[0].toJSON();
+				if(obj.stencil.id == 'Task' || obj.stencil.id == 'CollapsedSubprocess'){
+					var taskCmp = Ext.getCmp('task');
+					taskCmp.setValue(obj.properties.name.strip());
+					taskCmp.fireEvent('select');
+				}
+			}
+			
+			var showProcessImg = this.showProcessImg.bind(this);
+			
+			var successQuery = function(transport) {
+				var resJSON = transport.responseText.evalJSON();
+				var rt = Ext.data.Record.create([
+				    {name: 'comparedTask'},
+				    {name: 'comparedProcessID'},
+				    {name: 'matchingValue'}
+				])
+				var resultStore = new Ext.data.Store ({
+					isAutoLoad: true,
+				    reader: new Ext.data.JsonReader({
+				    	root: 'results',
+					    fields: [
+					        {name: 'comparedTask', mapping: 'comparedTask'},
+					        {name: 'comparedProcessID', mapping: 'comparedProcessID'},
+					        {name: 'matchingValue', mapping: 'matchingValue'}
+					    ]},rt)
+				})
+				
+				resultStore.loadData(resJSON);
+				
+				var grid = new Ext.grid.GridPanel({
+					id:	'grid_results',
+				    store: resultStore,
+				    autoScroll: true,
+				    colModel: new Ext.grid.ColumnModel({
+				    	defaultSortable: true,
+				    	defaults: {
+				            sortable: true
+				        },
+				        columns: [
+				            {id: 'similarTask', width: 10, header: 'Similar tasks', dataIndex: 'comparedTask', type:'string', 
+				            	renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+//				            		metaData.attr = 'ext:qtip="' + value + '"';
+				            		return value;
+				            	}
+				            },
+				            {id: 'processID', width: 10, header: 'ProcessID', dataIndex: 'comparedProcessID', type:'string'},
+				            {id: 'similarValue', width: 10, header: 'Similarity value', dataIndex: 'matchingValue', type:'float'},
+			            ]
+				    }),
+				    viewConfig: {
+				        forceFit: true,
+				    },
+				    sm: new Ext.grid.RowSelectionModel({
+		                singleSelect: true,
+		                listeners: {
+		                     rowselect: showProcessImg
+		               }
+		            }),
+				    width: 800,
+				    height: 400,
+				    frame: true,
+				    layout: 'fit',
+				    iconCls: 'icon-grid'
+				});
+				
+				var defaultData1 = {processID:resJSON.processID, taskName:resJSON.task, zone:resJSON.zone, method:resJSON.method}
+					// Create a Template
+				var dialog1 = new Ext.XTemplate(		
+						'<div style="height: 370px; width:250; background-color: #F0F0F0;">',
+							'<p id="details_box1" style="display:none; padding:5px; margin:2px; color:#383838;">',
+								'Task : {taskName} <br/>',
+								'Process : {processID} <br/>',
+								'Zone : {zone} <br/>',
+								'Method : {method} <br/>',
+							'</p>',
+						'</div>'
+				)
+				var panel = new Ext.Panel({
+				    layout:'border',
+				    defaults: {
+				        collapsible: true,
+				        split: true
+				    },
+				    width: 800,
+				    height: 400,
+				    items: [{
+				        title: ORYX.I18N.Query.queryDetailsDesc,
+				        collapseTitle : ORYX.I18N.Query.queryDetailsDesc,
+				        region:'west',
+				        margins: '5 0 0 0',
+				        cmargins: '5 5 0 0',
+				        width: 175,
+				        minSize: 100,
+				        maxSize: 250,
+				        html: dialog1.apply(defaultData1)
+				    },{
+				    	collapsible: false,
+				        region:'center',
+				        margins: '5 0 0 0',
+				        items: [grid]
+				    }]
+				});
+				
+				// Create new window and attach grid results into it
+				var winResults = new Ext.Window({
+					id		: 'Query_Result_Window',
+			        width	: 'auto',
+			        height	: 'auto',
+				    title	: ORYX.I18N.Query.queryResultsDesc,
+			        modal	: true,
+			        resizable	: false,
+					bodyStyle: 'background:#FFFFFF',
+			        items  : [panel],
+		            defaultButton: 0,
+			        buttons:[{
+		            	text: ORYX.I18N.Save.close,
+		            	handler: function(){
+		            		winResults.close();
+		            	}.bind(this)
+					}],
+					listeners: {
+						close: function(){					
+							winResults.destroy();
+							delete this.saving;
+						}.bind(this)
+					}
+			    });
+				win.close();
+				winResults.show();
+				Ext.get("grid_results").fadeIn({ endOpacity: 1, duration: 1});
+				Ext.get("details_box1").fadeIn({ endOpacity: 1, duration: 1});
+			}.bind(this);
+		}
 	},
 	
 	
@@ -654,5 +655,23 @@ ORYX.Plugins.Query = Clazz.extend({
 	        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
 	    }
 	    return copy;
-	}
+	},
+	
+	/**
+     * Check file name format whether it follow query process format
+     * ex/ name.query.queryNo
+     * */
+    isQueryProcess: function(processId){
+    	if(processId!=""){
+    		var nameFragments = processId.split(".");
+        	if(nameFragments.length>1 && nameFragments[1] == 'query'){
+        		return true;
+        	}else{
+        		return false;
+        	}
+    	}else{
+    		return false;
+    	}
+    	
+    },
 });

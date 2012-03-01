@@ -247,9 +247,25 @@ public class QueryHandler extends BasisHandler {
 			this.newProcess(jParams, res, token);
 		} else if (jobDesc.equals("newQuery")) {
 			this.newQuery(jParams);
+		} else if (jobDesc.equals("copyQuery")){
+			this.copyQuery(jParams);
 		}
 	}
 
+	private void copyQuery(JSONObject jParams) {
+		try {
+			String processID = jParams.getString("copyFrom");
+			String name = jParams.getString("name");
+			String desc = jParams.getString("description"); 
+			ProcessQuery query = ProcessQuery.getProcessQuery(processID);
+			ProcessQuery newQuery = new ProcessQuery(name, query.getTargetProcess(), query.getTargetTask(), query.getZone(), desc);
+			newQuery.saveQuery();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private void newQuery(JSONObject jParams) {
 		try {
 			String processID = jParams.getString("processID");

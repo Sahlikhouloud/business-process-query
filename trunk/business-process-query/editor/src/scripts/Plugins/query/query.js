@@ -30,7 +30,19 @@ ORYX.Plugins.Query = Clazz.extend({
 		 	],
 			functionality	: this.querying.bind(this),
 			group			: ORYX.I18N.Query.group,
-			isEnabled		: function(){ return true }.bind(this),
+			isEnabled		: function(){ 
+								// disable in case of query process
+								if(this.facade.getModelMetaData().name !="" ){
+									var nameFragments = this.facade.getModelMetaData().name.split(".");
+						        	if(nameFragments.length>1 && nameFragments[1] == 'query'){
+						        		return false;
+						        	}else{
+						        		return true;
+						        	}
+								}else{
+									return true;
+								}
+							  }.bind(this),
 			index			: 1
 		}); 
 

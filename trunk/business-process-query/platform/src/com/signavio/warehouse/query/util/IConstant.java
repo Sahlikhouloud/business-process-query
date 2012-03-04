@@ -11,6 +11,8 @@ public class IConstant {
 	
 	public static final int NO_OF_MAX_ZONE = 5;
 	
+	public static final String PROCESS_QUERY_ROOT_TREE_DESC = "Queries";
+	
 	public static String getMethodName(int i){
 		String name = "";
 		if(i == IConstant.LEVENSTEIN || i == IConstant.LEVENSTEIN_WITH_ZONEWEIGHT ){

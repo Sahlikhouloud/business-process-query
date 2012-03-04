@@ -3,12 +3,16 @@ package com.signavio.warehouse.query.business;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.signavio.warehouse.query.gateway.QueryDetailsGateway;
 import com.signavio.warehouse.query.gateway.util.BaseGateway;
+import com.signavio.warehouse.query.util.IConstant;
 
 public class ProcessQuery extends Process{
 
@@ -210,6 +214,132 @@ public class ProcessQuery extends Process{
 			e.printStackTrace();
 		}
 		return queryJSON;
+	}
+	
+	public static List <ProcessQuery> getQueriesOfTargetProcess(String processID){
+		Connection db;
+		List<ProcessQuery> queries = new ArrayList<ProcessQuery>();
+		try {
+			db = BaseGateway.getConnection();
+			ResultSet rs = QueryDetailsGateway.findByTargetProcessID(db, processID);
+			while(rs.next()){
+				ProcessQuery query = new ProcessQuery();
+				query.setProcessID(rs.getString("processid"));
+				query.setTargetProcess(rs.getString("target_process"));
+				query.setQueryNo(rs.getInt("query_no"));
+				query.setTargetTask(rs.getString("target_task"));
+				query.setZone(rs.getInt("zone"));
+				query.setQueryDesc(rs.getString("description"));
+				query.setInitiated(rs.getBoolean("is_initiated"));
+				queries.add(query);
+			}
+			rs.close();
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return queries;
+	}
+	
+	public static JSONArray exportAllQueriesJSON(List<ProcessQuery> queries){
+		JSONArray queriesJSON = new JSONArray();
+		try {
+			for(ProcessQuery query : queries){
+				if(query.isInitiated()){
+					JSONObject queryJSON = new JSONObject();
+					queryJSON.put("processID", query.getProcessID());
+					queryJSON.put("text", query.getProcessID());
+					queryJSON.put("leaf", true);
+					queryJSON.put("targetTask", query.getTargetTask());
+					queryJSON.put("targetProcess", query.getTargetProcess());
+					queryJSON.put("zone", query.getZone());
+					queryJSON.put("desc", query.getQueryDesc());
+					queryJSON.put("queryNo", query.getQueryNo());
+					queryJSON.put("isInitiated", query.isInitiated());
+					queriesJSON.put(queryJSON);
+				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return queriesJSON;
+	}
+	
+	public static JSONObject exportAllQueriesJSONWithRoot(List<ProcessQuery> queries){
+		JSONObject root = new JSONObject();
+		JSONArray queriesJSON = new JSONArray();
+		try {
+			root.put("text", IConstant.PROCESS_QUERY_ROOT_TREE_DESC);
+			root.put("leaf", false);
+			
+			for(ProcessQuery query : queries){
+				if(query.isInitiated()){
+					JSONObject queryJSON = new JSONObject();
+					queryJSON.put("processID", query.getProcessID());
+					queryJSON.put("text", query.getProcessID());
+					queryJSON.put("leaf", true);
+					queryJSON.put("targetTask", query.getTargetTask());
+					queryJSON.put("targetProcess", query.getTargetProcess());
+					queryJSON.put("zone", query.getZone());
+					queryJSON.put("desc", query.getQueryDesc());
+					queryJSON.put("queryNo", query.getQueryNo());
+					queryJSON.put("isInitiated", query.isInitiated());
+					queriesJSON.put(queryJSON);
+				}
+			}
+			root.put("children", queriesJSON);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return root;
+	}
+	
+	public static void bubbleSortDescByNoOfQuery(
+			List<ProcessQuery> queries) {
+		int n = queries.size();
+		int i, j;
+		for (i = 0; i < n; i++) {
+			for (j = 1; j < (n - i); j++) {
+				ProcessQuery resultPre = queries.get(j - 1);
+				ProcessQuery resultPost = queries.get(j);
+				if (resultPre.getQueryNo() < resultPost
+						.getQueryNo()) {
+					// swap
+					queries.remove(j - 1);
+					queries.add(j, resultPre);
+				}
+			}
+		}
+	}
+	
+	public static void bubbleSortAscByNoOfQuery(
+			List<ProcessQuery> queries) {
+		int n = queries.size();
+		int i, j;
+		for (i = 0; i < n; i++) {
+			for (j = 1; j < (n - i); j++) {
+				ProcessQuery resultPre = queries.get(j - 1);
+				ProcessQuery resultPost = queries.get(j);
+				if (resultPre.getQueryNo() > resultPost
+						.getQueryNo()) {
+					// swap
+					queries.remove(j - 1);
+					queries.add(j, resultPre);
+				}
+			}
+		}
 	}
 }
 

@@ -246,7 +246,10 @@ ORYX.I18N.Query.exception = "There was an exception";
 ORYX.I18N.Query.getFileException = "There was an exception during generating a query name";
 ORYX.I18N.Query.saveQeuryexception = "There was an exception during creating a query";
 ORYX.I18N.Query.initQueryFailure = "There was an exception during initiating a query";
+ORYX.I18N.Query.loadQueryFailure = "There was an exception during loading queries";
+ORYX.I18N.Query.loadSVGQueryFailure = "There was an exception during loading SVG of this query";
 ORYX.I18N.Query.updateInitStatusFailure = "There was an exception updating init status of a query";
+ORYX.I18N.Query.noSelectedQuery = "Please select a query first!";
 
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 

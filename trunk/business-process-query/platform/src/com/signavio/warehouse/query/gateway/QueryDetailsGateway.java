@@ -71,4 +71,20 @@ public class QueryDetailsGateway {
 		stmt.setString(2, processID);
 		return stmt.execute();
 	}
+	
+	private static final String findByTargetProcessID = "SELECT processid, query_no, target_process, target_task, zone, description, is_initiated "
+		+ " FROM query_details WHERE target_process = ? ";
+
+	public static ResultSet findByTargetProcessID(Connection db, String processID) {
+		ResultSet rs = null;
+		try {
+			PreparedStatement stmt = db.prepareStatement(findByTargetProcessID);
+			stmt.setString(1, processID);
+			rs = stmt.executeQuery();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return rs;
+	}
 }

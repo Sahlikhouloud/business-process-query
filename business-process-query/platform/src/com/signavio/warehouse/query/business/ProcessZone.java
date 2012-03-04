@@ -385,15 +385,31 @@ public class ProcessZone {
 		// get compared processes
 		List<ProcessZone> comparedProcesses = new ArrayList<ProcessZone>();
 
-		for (int i = 0; i < processIDs.size(); i++) {
-			ProcessZone comparedProcess = new ProcessZone(processIDs.get(i));
-			//no include query process
-			if(!comparedProcess.isQueryProcess()){
-				comparedProcesses.add(comparedProcess);
+		//if execute from query process then no need to include its own target process
+		if(this.isQueryProcess()){
+			String[] nameFragments = this.getProcessID().split("\\.");
+			for (int i = 0; i < processIDs.size(); i++) {
+				ProcessZone comparedProcess = new ProcessZone(processIDs.get(i));
+				
+				//no include query process and its own target process
+				if(!comparedProcess.isQueryProcess() && !nameFragments[0].equals(comparedProcess.getProcessID())){
+					comparedProcesses.add(comparedProcess);
+				}
 			}
+			this.computeMatchingValue(comparedProcesses, fromZone, toZone,
+					consideringZoneWeight, considerSimOfGateway, targetTaskID);
+		}else{
+			for (int i = 0; i < processIDs.size(); i++) {
+				ProcessZone comparedProcess = new ProcessZone(processIDs.get(i));
+				
+				//no include query process
+				if(!comparedProcess.isQueryProcess()){
+					comparedProcesses.add(comparedProcess);
+				}
+			}
+			this.computeMatchingValue(comparedProcesses, fromZone, toZone,
+					consideringZoneWeight, considerSimOfGateway, targetTaskID);
 		}
-		this.computeMatchingValue(comparedProcesses, fromZone, toZone,
-				consideringZoneWeight, considerSimOfGateway, targetTaskID);
 	}
 
 	// (if there is no targetTaskID then compute all tasks)
@@ -565,6 +581,15 @@ public class ProcessZone {
 	
 	public boolean isQueryProcess() {
 		String[] nameFragments = this.processID.split("\\.");
+		if (nameFragments.length > 1 && nameFragments[1].equals("query")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public static boolean isQueryProcess(String processId) {
+		String[] nameFragments = processId.split("\\.");
 		if (nameFragments.length > 1 && nameFragments[1].equals("query")) {
 			return true;
 		} else {

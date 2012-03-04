@@ -2,6 +2,7 @@ package com.signavio.warehouse.query.handler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +59,25 @@ public class QueryHandler extends BasisHandler {
 			this.getNoOfQuery(jParams, res, token);
 		} else if (jobDesc.equals("getInitQuery")) {
 			this.getInitQuery(jParams, res);
+		} else if(jobDesc.equals("getAllQueries")){
+			this.getAllQueries(jParams, res);
+		}
+	}
+	
+	
+	private void getAllQueries(JSONObject jParams, HttpServletResponse res){
+		try {
+			String processID = jParams.getString("processID");
+			List<ProcessQuery> queries = ProcessQuery.getQueriesOfTargetProcess(processID);
+			ProcessQuery.bubbleSortAscByNoOfQuery(queries);
+			JSONArray queriesJSON = ProcessQuery.exportAllQueriesJSON(queries);
+			res.getWriter().write(queriesJSON.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

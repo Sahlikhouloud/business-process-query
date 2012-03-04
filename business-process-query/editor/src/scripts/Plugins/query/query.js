@@ -637,8 +637,6 @@ ORYX.Plugins.Query = Clazz.extend({
 	   			        		Ext.getCmp('recommendation_panel').collapse(false);
 	   			        		Ext.getCmp('recommendation_output_panel').add(panel2);
 	   			        		Ext.getCmp('recommendation_output_panel').doLayout();
-	   			        		Ext.getCmp('recommendation_tab_panel').doLayout();
-	   			        		Ext.getCmp('recommendation_panel').doLayout();
 	   			        		Ext.getCmp('recommendation_panel').expand(true);
 	   			        		
 	   			},failure			: function(transport) {

@@ -23,7 +23,7 @@ ORYX.Plugins.Query = Clazz.extend({
 			description		: ORYX.I18N.Query.queryAltDesc,
 			icon			: ORYX.PATH + "images/query.png",
 			keyCodes: [{
-					metaKeys: [ORYX.CONFIG.META_KEY_META_CTRL],
+					metaKeys: [ORYX.CONFIG.META_KEY_META_CTRL,ORYX.CONFIG.META_KEY_ALT],
 					keyCode: 81, //q key-code
 					keyAction: ORYX.CONFIG.KEY_ACTION_DOWN
 				}

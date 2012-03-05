@@ -220,6 +220,7 @@ ORYX.I18N.Query.selectBtn = "Show";
 ORYX.I18N.Query.copyBtn = "Copy";
 ORYX.I18N.Query.copyCmpBtn = "Copy components";
 ORYX.I18N.Query.copyAllBtn = "Copy process";
+ORYX.I18N.Query.resetBtn = "Reset";
 ORYX.I18N.Query.openNewWindowBtn = "Open new window";
 ORYX.I18N.Query.openNewTabBtn = "Open new tab";
 ORYX.I18N.Query.queryResultsDesc = "Recommendation results";

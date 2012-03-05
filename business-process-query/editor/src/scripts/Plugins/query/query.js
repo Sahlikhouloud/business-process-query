@@ -698,7 +698,6 @@ ORYX.Plugins.Query = Clazz.extend({
 	   			        		});
 	   			        		
 	   			        		Ext.getCmp('recommendation_tab_panel').setActiveTab(1);
-	   			        		Ext.getCmp('recommendation_panel').collapse(false);
 	   			        		Ext.getCmp('recommendation_output_panel').add(panel2);
 	   			        		Ext.getCmp('recommendation_output_panel').doLayout();
 	   			        		Ext.getCmp('recommendation_panel').expand(true);
@@ -707,7 +706,7 @@ ORYX.Plugins.Query = Clazz.extend({
 	   				Ext.WindowMgr.get('svg_Window').close();
 	   				Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
 			}
-   		})
+   		});
 	},
 	
 	clone: function(obj) {

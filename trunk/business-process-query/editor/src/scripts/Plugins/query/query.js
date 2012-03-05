@@ -629,6 +629,7 @@ ORYX.Plugins.Query = Clazz.extend({
 	   			        		var panel2 = new Ext.Panel({
 	   			        			id: 'svg_recommendation_panel',
 	   			        			autoScroll: true,
+	   			        			border	:false,
 	   			        			html: dialogIn.apply(dataDefault),
 	   			        			bodyStyle:    'background-color:#FFFFFE'
 	   			        		});

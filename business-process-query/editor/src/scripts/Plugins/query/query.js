@@ -383,6 +383,10 @@ ORYX.Plugins.Query = Clazz.extend({
 								'Zone : {zone} <br/>',
 								'Method : {method} <br/>',
 							'</p>',
+							'<input type="hidden" id="input_query_task" value="{taskName}"/>',
+							'<input type="hidden" id="input_query_process" value="{processID}"/>',
+							'<input type="hidden" id="input_query_zone" value="{zone}"/>',
+							'<input type="hidden" id="input_query_method" value="{method}"/>',
 						'</div>'
 				)
 				var panel = new Ext.Panel({
@@ -474,104 +478,163 @@ ORYX.Plugins.Query = Clazz.extend({
 				              },
    			success			: function(transport) {
    								var SVGTag = transport.responseText;
-   								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
-				   				Ext.WindowMgr.get('Query_Result_Window').hide();
-				   				var defaultData = {processID:record.get('comparedProcessID').strip(), taskName:record.get('comparedTask').strip(), simValue:record.get('matchingValue') }
-				   				// Create a Template
-				   				var dialog = new Ext.XTemplate(	
-				   						'<div style="width: 900px; height: 400px; overflow:scroll;">',
-					   						'<p id="details_box2" style="display:none; border-style:solid; border-width:1px; padding:5px; margin:2px; position:absolute; top:3px; left:10px; border-color: #C3C3C3; background-color: #F0F0F0; color:#383838;">',
-					   							'Task : {taskName} <br/>',
-					   							'Process : {processID} <br/>',
-					   							'Sim. value : {simValue} <br/>',
-					   						'</p>',
-					   						'<div id="svg_box" style="display:none;">' + SVGTag + '</div>',
-				   						'</div>'
-				   				)
-				   				
-				   				// Create new window and SVG tag into it
-				   				var winSVG = new Ext.Window({
-				   			        id		: 'svg_Window',
-				   			        width	: 'auto',
-				   			        height	: 'auto',
-				   				    title	: ORYX.I18N.Query.queryResultsSVGDesc,
-//				   				    maximizable: true,
-				   			        modal	: true,
-				   			        resizable	: false,
-				   					bodyStyle: 'background:#FFFFFF',
-				   					html: dialog.apply(defaultData),
-				   					frame: true,
-				   		            defaultButton: 0,
-				   						buttons:[{
-					   			        	text: ORYX.I18N.Query.copyAllBtn,
-					   			        	handler: function(){
-					   			        		winSVG.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
-					   			        		Ext.Ajax.request({
-						   			 	   			url				: prefix+'query/',
-						   			 	   			method			: "GET",
-						   			 	   			timeout			: 1800000,
-						   			 	   			disableCaching	: true,
-						   			 	   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
-						   			 	   			params			: {
-						   			 									id: 'getJSON',
-						   			 									task: record.get('comparedTask').strip(),
-						   			 									processID: record.get('comparedProcessID').strip(),
-						   			 									parent: modelMeta.parent
-						   			 					              },
-						   			 	   			success			: function(transport) {
-											   			 	   			winSVG.close();
-											   			        		
-											   			        		//remove old recommended process
-											   			 	   			Ext.getCmp('recommendation_tab_panel').setActiveTab(1);
-											   			        		var previousSVG = Ext.getCmp('svg_recommendation_panel');
-											   			        		if(previousSVG){
-											   			        			Ext.getCmp('recommendation_output_panel').remove(previousSVG);
-											   			        		}
-											   			        		
-											   			        		Ext.getCmp('recommendation_panel').collapse(true);
-											   			        		
-											   			        		facadeObj.importJSON(transport.responseText.evalJSON());
-						   			 	   			},failure			: function(transport) {
-						   			 	   				winSVG.close();
-						   			 	   				Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
-													}
-					   			        		})
-					   			        	}.bind(this)
-					   					},{
-					   			        	text: ORYX.I18N.Query.selectBtn,
-					   			        	handler: function(){
-					   			        		createInteractiveSVG(record.get('comparedTask').strip(), record.get('comparedProcessID').strip());
-					   			        	}.bind(this)
-					   					},{
-					   						text: ORYX.I18N.Query.backBtn,
-					   						handler: function(){
-					   							winSVG.close();
-					   							Ext.WindowMgr.get('Query_Result_Window').show();
-					   							Ext.getCmp("grid_results").getSelectionModel().deselectRow(rowIndex);
-					   							Ext.get("grid_results").fadeIn({ endOpacity: 1, duration: 1});
-					   							Ext.get("details_box1").fadeIn({ endOpacity: 1, duration: 1});
-					   						},
-					   						listeners:{
-					   							render:function(){
-					   								this.focus();
-					   							}
-					   						}
-					   					},{
-					   			        	text: ORYX.I18N.Save.close,
-					   			        	handler: function(){
-					   			        		winSVG.close();
-					   			        	}.bind(this)
-					   					}],
-				   					listeners: {
-				   						close: function(){					
-				   							winSVG.destroy();
-				   							delete this.saving;
-				   						}.bind(this)
-				   					}  
-				   			    });
-				   				winSVG.show();
-				   				Ext.get("svg_box").fadeIn({ endOpacity: 1, duration: 1});
-				   				Ext.get("details_box2").slideIn('l', { duration: 1 });
+   								//input panel
+				   				var defaultDataInput = {taskName:Ext.get('input_query_task').getValue(),
+				   							processID:Ext.get('input_query_process').getValue(),
+					   						zone:Ext.get('input_query_zone').getValue(),
+					   						method:Ext.get('input_query_method').getValue()
+				   						};
+				   				//get input SVG
+				   				Ext.Ajax.request({
+				   		   			url				: prefix+'query/',
+				   		   			method			: "GET",
+				   		   			timeout			: 1800000,
+				   		   			disableCaching	: true,
+				   		   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+				   		   			params			: {
+				   										id: 'getSVG',
+				   										task: defaultDataInput.taskName.strip(),
+				   										processID: defaultDataInput.processID.strip(),
+				   										parent: modelMeta.parent
+				   						              },
+				   		   			success			: function(transport) {
+					   		   			Ext.WindowMgr.get('Query_Result_Window').body.unmask();
+						   				Ext.WindowMgr.get('Query_Result_Window').hide();
+						   				
+						   				//input panel
+						   				// Create a Template
+						   				var dialogInput = new Ext.XTemplate(	
+						   						'<div style="width: 900px; height: 250px; overflow:scroll;">',
+							   						'<p id="input_details_box2" style="display:none; border-style:solid; border-width:1px; padding:5px; margin:2px; position:absolute; top:3px; left:10px; border-color: #C3C3C3; background-color: #F0F0F0; color:#383838;">',
+							   							'<b>Query process</b><br/>',	
+							   							'Task : {taskName} <br/>',
+							   							'Process : {processID} <br/>',
+							   							'Zone : {zone} <br/>',
+							   							'Method : {method} <br/>',
+							   						'</p>',
+							   						'<div id="svg_input_box" style="display:none; text-align: center">' + transport.responseText + '</div>',
+						   						'</div>'
+						   				)
+						   				
+						   				//output panel 
+						   				var defaultDataOutput = {processID:record.get('comparedProcessID').strip(), taskName:record.get('comparedTask').strip(), simValue:record.get('matchingValue') }
+						   				// Create a Template
+						   				var dialogOutput = new Ext.XTemplate(	
+						   						'<div style="width: 900px; height: 250px; overflow:scroll;">',
+							   						'<p id="details_box2" style="display:none; border-style:solid; border-width:1px; padding:5px; margin:2px; position:absolute; top:3px; left:10px; border-color: #C3C3C3; background-color: #F0F0F0; color:#383838;">',
+							   							'<b>Similar process</b><br/>',
+							   							'Task : {taskName} <br/>',
+							   							'Process : {processID} <br/>',
+							   							'Sim. value : {simValue} <br/>',
+							   						'</p>',
+							   						'<div id="svg_box" style="display:none; text-align: center">' + SVGTag + '</div>',
+						   						'</div>'
+						   				)
+						   				var panel = new Ext.Panel({
+						   					type: 'vbox',
+						   					align : 'stretch',
+										    width: 'auto',
+										    height: 'auto',
+										    items: [{
+										        margins: '5 0 0 0',
+										        html: dialogInput.apply(defaultDataInput)
+										    },{
+										        margins: '5 0 0 0',
+										        html: dialogOutput.apply(defaultDataOutput)
+										    }]
+										});
+						   				// Create new window and SVG tag into it
+						   				var winSVG = new Ext.Window({
+						   			        id		: 'svg_Window',
+						   			        width	: 'auto',
+						   			        height	: 'auto',
+						   				    title	: ORYX.I18N.Query.queryResultsSVGDesc,
+//						   				    maximizable: true,
+						   			        modal	: true,
+						   			        resizable	: false,
+						   					bodyStyle: 'background:#FFFFFF',
+						   					frame: true,
+						   					items: [panel],
+						   		            defaultButton: 0,
+						   						buttons:[{
+							   			        	text: ORYX.I18N.Query.copyAllBtn,
+							   			        	handler: function(){
+							   			        		winSVG.body.mask(ORYX.I18N.Query.pleaseWait, "x-waiting-box");
+							   			        		Ext.Ajax.request({
+								   			 	   			url				: prefix+'query/',
+								   			 	   			method			: "GET",
+								   			 	   			timeout			: 1800000,
+								   			 	   			disableCaching	: true,
+								   			 	   			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+								   			 	   			params			: {
+								   			 									id: 'getJSON',
+								   			 									task: record.get('comparedTask').strip(),
+								   			 									processID: record.get('comparedProcessID').strip(),
+								   			 									parent: modelMeta.parent
+								   			 					              },
+								   			 	   			success			: function(transport) {
+													   			 	   			winSVG.close();
+													   			        		
+													   			        		//remove old recommended process
+													   			 	   			Ext.getCmp('recommendation_tab_panel').setActiveTab(1);
+													   			        		var previousSVG = Ext.getCmp('svg_recommendation_panel');
+													   			        		if(previousSVG){
+													   			        			Ext.getCmp('recommendation_output_panel').remove(previousSVG);
+													   			        		}
+													   			        		
+													   			        		Ext.getCmp('recommendation_panel').collapse(true);
+													   			        		
+													   			        		facadeObj.importJSON(transport.responseText.evalJSON());
+								   			 	   			},failure			: function(transport) {
+								   			 	   				winSVG.close();
+								   			 	   				Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.exception+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+															}
+							   			        		})
+							   			        	}.bind(this)
+							   					},{
+							   			        	text: ORYX.I18N.Query.selectBtn,
+							   			        	handler: function(){
+							   			        		createInteractiveSVG(record.get('comparedTask').strip(), record.get('comparedProcessID').strip());
+							   			        	}.bind(this)
+							   					},{
+							   						text: ORYX.I18N.Query.backBtn,
+							   						handler: function(){
+							   							winSVG.close();
+							   							Ext.WindowMgr.get('Query_Result_Window').show();
+							   							Ext.getCmp("grid_results").getSelectionModel().deselectRow(rowIndex);
+							   							Ext.get("grid_results").fadeIn({ endOpacity: 1, duration: 1});
+							   							Ext.get("details_box1").fadeIn({ endOpacity: 1, duration: 1});
+							   						},
+							   						listeners:{
+							   							render:function(){
+							   								this.focus();
+							   							}
+							   						}
+							   					},{
+							   			        	text: ORYX.I18N.Save.close,
+							   			        	handler: function(){
+							   			        		winSVG.close();
+							   			        	}.bind(this)
+							   					}],
+						   					listeners: {
+						   						close: function(){					
+						   							winSVG.destroy();
+						   							delete this.saving;
+						   						}.bind(this)
+						   					}  
+						   			    });
+						   				winSVG.show();
+						   				Ext.get("svg_input_box").fadeIn({ endOpacity: 1, duration: 1});
+						   				Ext.get("input_details_box2").slideIn('l', { duration: 1 });
+						   				Ext.get("svg_box").fadeIn({ endOpacity: 1, duration: 1});
+						   				Ext.get("details_box2").slideIn('l', { duration: 1 });
+				   		   			},failure			: function(transport) {
+		   								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
+		   								Ext.WindowMgr.get('Query_Result_Window').hide();
+		   								Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getSVGFailure+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
+		   								Ext.WindowMgr.get('Query_Result_Window').show();
+									  }
+				   					});
 							  },
    			failure			: function(transport) {
    								Ext.WindowMgr.get('Query_Result_Window').body.unmask();
@@ -579,7 +642,7 @@ ORYX.Plugins.Query = Clazz.extend({
    								Ext.Msg.alert(ORYX.I18N.Oryx.title, ORYX.I18N.Query.getSVGFailure+' "'+record.get('comparedProcessID').strip()+'"').setIcon(Ext.Msg.WARNING).getDialog().setWidth(260).center().syncSize();
    								Ext.WindowMgr.get('Query_Result_Window').show();
 							  }
-   		})
+   		});
 	},
 	
 	//create interactive SVG from a ordinary one

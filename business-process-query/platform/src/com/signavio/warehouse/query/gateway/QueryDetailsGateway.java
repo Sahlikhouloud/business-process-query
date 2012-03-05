@@ -87,4 +87,19 @@ public class QueryDetailsGateway {
 		}
 		return rs;
 	}
+	
+	private static final String updateInitStatusAndDesc = "UPDATE query_details SET is_initiated = ?, description = ? WHERE processid = ? ";
+
+	public static boolean updateInitStatusAndDesc(Connection db, boolean isInit, String desc,
+			String processID) throws SQLException, InstantiationException,
+			IllegalAccessException, ClassNotFoundException {
+
+		System.out.println(updateInitStatusAndDesc + " of process: " + processID);
+
+		PreparedStatement stmt = db.prepareStatement(updateInitStatusAndDesc);
+		stmt.setBoolean(1, isInit);
+		stmt.setString(2, desc);
+		stmt.setString(3, processID);
+		return stmt.execute();
+	}
 }

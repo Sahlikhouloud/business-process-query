@@ -199,6 +199,27 @@ public class ProcessQuery extends Process{
 		}
 	}
 	
+	public void updateDetails(){
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			QueryDetailsGateway.updateInitStatusAndDesc(db, this.isInitiated, this.queryDesc, this.getProcessID());
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public JSONObject exportJSON(){
 		JSONObject queryJSON = new JSONObject();
 		try {

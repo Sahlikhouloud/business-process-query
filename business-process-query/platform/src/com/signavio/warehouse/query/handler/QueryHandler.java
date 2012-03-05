@@ -356,6 +356,7 @@ public class QueryHandler extends BasisHandler {
 			String parentId = jParams.getString("parent");
 			parentId = parentId.replace("/directory/", "");
 			String name = jParams.getString("name");
+			String desc = jParams.getString("description");
 
 			File fXmlFile = FileUtil.openBpmn20File(parentId, token, name);
 
@@ -375,7 +376,9 @@ public class QueryHandler extends BasisHandler {
 						}
 					}
 					ProcessQuery query = ProcessQuery.getProcessQuery(name);
-					query.finishInitQuery();
+					query.setQueryDesc(desc);
+					query.setInitiated(true);
+					query.updateDetails();
 				}else { // for ordinary process
 					if (jParams.has("id")) {
 						String id = jParams.getString("id");

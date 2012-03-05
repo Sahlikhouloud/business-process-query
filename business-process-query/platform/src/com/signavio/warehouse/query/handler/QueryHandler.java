@@ -397,4 +397,48 @@ public class QueryHandler extends BasisHandler {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Overwrite
+	 */
+	public <T extends FsSecureBusinessObject> void doDelete(
+			HttpServletRequest req, HttpServletResponse res,
+			FsAccessToken token, T sbo) {
+		System.out.println("QueryHandler... doDelete ");
+		// Get the parameter list
+		JSONObject jParams = (JSONObject) req.getAttribute("params");
+		String jobDesc = "";
+		try {
+			jobDesc = jParams.getString("id");
+		} catch (JSONException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
+		if (jobDesc.equals("deleteQuery")) {
+			this.deleteQuery(jParams, token);
+		}
+	}
+	
+	private void deleteQuery(JSONObject jParams,
+			FsAccessToken token) {
+		try {
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
+			String name = jParams.getString("processID");
+
+			File fXmlFile = FileUtil.openBpmn20File(parentId, token, name);
+			boolean deleteBpmn = fXmlFile.delete();
+			File fXmlFile1 = FileUtil.openSignavioFile(parentId, token, name);
+			boolean deleteSig = fXmlFile1.delete();
+			if(deleteBpmn && deleteSig){
+				Process.deleteByProcessIDStatic(name);
+				Process.removeNeighborsServiceStatic(name);
+				ProcessQuery.deleteByProcessIDStatic(name);
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

@@ -250,6 +250,8 @@ ORYX.I18N.Query.loadQueryFailure = "There was an exception during loading querie
 ORYX.I18N.Query.loadSVGQueryFailure = "There was an exception during loading SVG of this query";
 ORYX.I18N.Query.updateInitStatusFailure = "There was an exception updating init status of a query";
 ORYX.I18N.Query.noSelectedQuery = "Please select a query first!";
+ORYX.I18N.Query.deleteQueryTitle = "Delete a query";
+ORYX.I18N.Query.deleteQueryMsg = "Do you want to delete this query?";
 
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 

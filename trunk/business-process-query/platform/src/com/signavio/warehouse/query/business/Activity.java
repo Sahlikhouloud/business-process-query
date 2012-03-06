@@ -216,6 +216,7 @@ public class Activity {
 							this.source != null ? this.source.getId() : null,
 							this.target != null ? this.target.getId() : null,
 							processID);
+			db.close();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

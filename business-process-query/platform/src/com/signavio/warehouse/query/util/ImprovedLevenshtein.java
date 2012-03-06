@@ -22,8 +22,7 @@ public class ImprovedLevenshtein {
 	public static boolean canApplySimOfGateway(String pattern1, String pattern2) {
 		boolean canApply = false;
 
-		if (isOneSequencialPattern(pattern1)
-				&& isOneSequencialPattern(pattern2)) {
+		if (isOneSequencialPatternWithTheSameDirection(pattern1, pattern2)) {
 			canApply = true;
 		}
 		return canApply;
@@ -39,6 +38,23 @@ public class ImprovedLevenshtein {
 			oneSequencial = true;
 		}
 		return oneSequencial;
+	}
+
+	public static boolean isOneSequencialPatternWithTheSameDirection(
+			String pattern1, String pattern2) {
+		boolean sameDirection = false;
+		String[] atomicPatterns1 = pattern1.split("\\|\\|");
+		String[] atomicPatterns2 = pattern2.split("\\|\\|");
+		if (isOneSequencialPattern(pattern1)
+				&& isOneSequencialPattern(pattern2)) {
+			if ((atomicPatterns1[0].split(",")[0].equals("s") && atomicPatterns2[0]
+					.split(",")[0].equals("s"))
+					|| (atomicPatterns1[0].split(",")[1].equals("s") && atomicPatterns2[0]
+							.split(",")[1].equals("s"))) {
+				sameDirection = true;
+			}
+		}
+		return sameDirection;
 	}
 
 	public static double histogramEqualization(double targetValue) {

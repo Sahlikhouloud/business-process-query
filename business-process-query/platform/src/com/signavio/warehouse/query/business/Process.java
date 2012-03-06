@@ -1378,6 +1378,7 @@ public class Process {
 		try {
 			db = BaseGateway.getConnection();
 			AB3CCollectionGateway.deleteProcess(db, this.processID);
+			db.close();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1398,6 +1399,7 @@ public class Process {
 		try {
 			db = BaseGateway.getConnection();
 			AB3CCollectionGateway.deleteProcess(db, processID);
+			db.close();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1418,6 +1420,7 @@ public class Process {
 		try {
 			db = BaseGateway.getConnection();
 			ServiceNeighborsGateway.deleteNeighbors(db, this.processID);
+			db.close();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1438,6 +1441,7 @@ public class Process {
 		try {
 			db = BaseGateway.getConnection();
 			ServiceNeighborsGateway.deleteNeighbors(db, id);
+			db.close();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

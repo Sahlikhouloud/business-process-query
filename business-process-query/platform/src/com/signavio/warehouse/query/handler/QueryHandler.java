@@ -50,13 +50,13 @@ public class QueryHandler extends BasisHandler {
 		} else if (jobDesc.equals("getMaxZone")) {
 			this.getMaxZone(jParams, res);
 		} else if (jobDesc.equals("getSVG")) {
-			this.getSVG(jParams, res, token);
+			this.getSVG(jParams, res);
 		} else if (jobDesc.equals("getJSON")) {
 			this.getJSON(jParams, res, token);
 		} else if (jobDesc.equals("getInteractiveSVG")) {
-			this.getInteractiveSVG(jParams, res, token);
+			this.getInteractiveSVG(jParams, res);
 		} else if (jobDesc.equals("getNoOfQuery")) {
-			this.getNoOfQuery(jParams, res, token);
+			this.getNoOfQuery(jParams, res);
 		} else if (jobDesc.equals("getInitQuery")) {
 			this.getInitQuery(jParams, res);
 		} else if(jobDesc.equals("getAllQueries")){
@@ -96,14 +96,12 @@ public class QueryHandler extends BasisHandler {
 		}
 	}
 
-	private void getNoOfQuery(JSONObject jParams, HttpServletResponse res,
-			FsAccessToken token) {
+	private void getNoOfQuery(JSONObject jParams, HttpServletResponse res) {
 		try {
 			String processID = jParams.getString("processID");
-			String parentId = jParams.getString("parent");
-			parentId = parentId.replace("/directory/", "");
-			File[] files = FileUtil.getFilesInDir(parentId, token);
+			
 			Process process = new Process(processID);
+			File[] files = FileUtil.getFilesInDir(process.getDirFromDB());
 			process.setNoOfQuery(files);
 			res.getWriter().write(process.getNoOfQuery() + "");
 		} catch (JSONException e) {
@@ -116,17 +114,13 @@ public class QueryHandler extends BasisHandler {
 
 	}
 
-	private void getInteractiveSVG(JSONObject jParams, HttpServletResponse res,
-			FsAccessToken token) {
+	private void getInteractiveSVG(JSONObject jParams, HttpServletResponse res) {
 		try {
 			String processID = jParams.getString("processID");
 			String taskName = jParams.getString("task");
-			String parentId = jParams.getString("parent");
-			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = FileUtil.openSignavioFile(parentId, token,
-					processID);
 			Process process = new Process(processID);
+			File fXmlFile = FileUtil.openSignavioFile(process.getDirFromDB(), processID);
 			process.setSvgRepresentation(fXmlFile);
 			process.highlightTargetTaskInSVG(taskName);
 			process.createInteractiveSvgRepresentation();
@@ -141,17 +135,13 @@ public class QueryHandler extends BasisHandler {
 		}
 	}
 
-	private void getSVG(JSONObject jParams, HttpServletResponse res,
-			FsAccessToken token) {
+	private void getSVG(JSONObject jParams, HttpServletResponse res) {
 		try {
 			String processID = jParams.getString("processID");
 			String taskName = jParams.getString("task");
-			String parentId = jParams.getString("parent");
-			parentId = parentId.replace("/directory/", "");
-
-			File fXmlFile = FileUtil.openSignavioFile(parentId, token,
-					processID);
+			
 			Process process = new Process(processID);
+			File fXmlFile = FileUtil.openSignavioFile(process.getDirFromDB(), processID);
 			process.setSvgRepresentation(fXmlFile);
 			process.highlightTargetTaskInSVG(taskName);
 			String svgRepresentation = process.getSvgRepresentation();
@@ -170,12 +160,9 @@ public class QueryHandler extends BasisHandler {
 		try {
 			String processID = jParams.getString("processID");
 			// String taskName = jParams.getString("task");
-			String parentId = jParams.getString("parent");
-			parentId = parentId.replace("/directory/", "");
 
-			File fXmlFile = FileUtil.openSignavioFile(parentId, token,
-					processID);
 			Process process = new Process(processID);
+			File fXmlFile = FileUtil.openSignavioFile(process.getDirFromDB(), processID);
 			process.setJSONRepresentation(fXmlFile);
 			String jsonRepresentation = process.getJsonRepresentation();
 			res.getWriter().write(jsonRepresentation);
@@ -266,36 +253,49 @@ public class QueryHandler extends BasisHandler {
 		if (jobDesc.equals("saveProcess")) {
 			this.newProcess(jParams, res, token);
 		} else if (jobDesc.equals("newQuery")) {
-			this.newQuery(jParams);
+			this.newQuery(jParams, token);
 		} else if (jobDesc.equals("copyQuery")){
-			this.copyQuery(jParams);
+			this.copyQuery(jParams, token);
 		}
 	}
 
-	private void copyQuery(JSONObject jParams) {
+	private void copyQuery(JSONObject jParams, FsAccessToken token) {
 		try {
 			String processID = jParams.getString("copyFrom");
 			String name = jParams.getString("name");
 			String desc = jParams.getString("description"); 
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
 			ProcessQuery query = ProcessQuery.getProcessQuery(processID);
 			ProcessQuery newQuery = new ProcessQuery(name, query.getTargetProcess(), query.getTargetTask(), query.getZone(), desc);
 			newQuery.saveQuery();
+			String dir = FileUtil.getDirectory(parentId, token);
+			Process process = new Process(name);
+			process.setDirectory(dir);
+			process.persistDir();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private void newQuery(JSONObject jParams) {
+	private void newQuery(JSONObject jParams, FsAccessToken token) {
 		try {
 			String processID = jParams.getString("processID");
 			int zone = jParams.getInt("zone");
 			String targetProcess = jParams.getString("targetProcess");
 			String targetTask = jParams.getString("targetTask");
 			String desc = jParams.getString("queryDesc");
+			String parentId = jParams.getString("parent");
+			parentId = parentId.replace("/directory/", "");
 			ProcessQuery query = new ProcessQuery(processID, targetProcess,
 					targetTask, zone, desc);
 			query.saveQuery();
+			String dir = FileUtil.getDirectory(parentId, token);
+			Process process = new Process(processID);
+			process.setDirectory(dir);
+			process.persistDir();
+			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -313,10 +313,13 @@ public class QueryHandler extends BasisHandler {
 
 			Process process = new Process(name);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
+			String dir = FileUtil.getDirectory(parentId, token);
+			process.setDirectory(dir);
 			if (!exception.equals("") && exception != null) {
 				res.getWriter().write(exception);
 			} else {
 				process.persist();
+				process.persistDir();
 				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
 			}
 		} catch (JSONException e) {
@@ -361,10 +364,12 @@ public class QueryHandler extends BasisHandler {
 			File fXmlFile = FileUtil.openBpmn20File(parentId, token, name);
 
 			Process process = new Process(name);
+			String dir = FileUtil.getDirectory(parentId, token);
 			String exception = process.mapXMLfileIntoModel(fXmlFile);
 			if (!exception.equals("") && exception != null) {
 				res.getWriter().write(exception);
 			} else {
+				process.setDirectory(dir);
 				//for query process update init Status every time it is saved
 				if(process.isQueryProcess()){
 					if (jParams.has("id")) {
@@ -390,6 +395,7 @@ public class QueryHandler extends BasisHandler {
 					}
 				}
 				process.persist();
+				process.updateDir();
 				process.addNeighborServices(IConstant.NO_OF_MAX_ZONE, true);
 			}
 		} catch (JSONException e) {
@@ -437,6 +443,7 @@ public class QueryHandler extends BasisHandler {
 			if(deleteBpmn && deleteSig){
 				Process.deleteByProcessIDStatic(name);
 				Process.removeNeighborsServiceStatic(name);
+				Process.deleteDirByProcessIDStatic(name);
 				ProcessQuery.deleteByProcessIDStatic(name);
 			}
 		} catch (JSONException e) {

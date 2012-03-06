@@ -232,6 +232,7 @@ public class ModelHandler extends BasisHandler {
 		FsModel model = (FsModel) sbo;
 		//add delete model for query plugin (Actually, should request from JS to doDelete in QueryHandler but JS is in one line version)
 		Process.deleteByProcessIDStatic(model.getName());
+		Process.deleteDirByProcessIDStatic(model.getName());
 		Process.removeNeighborsServiceStatic(model.getName());
 		ProcessQuery.deleteByProcessIDStatic(model.getName());
 		

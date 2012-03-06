@@ -286,7 +286,8 @@ ORYX.Plugins.NewQuery = Clazz.extend({
 							zone: zone,
 							targetProcess: modelMeta.name,
 							targetTask: task,
-							queryDesc: ""
+							queryDesc: "",
+							parent: modelMeta.parent
 			            },
 						encoding: 'UTF-8',
 						onSuccess: function(transport){

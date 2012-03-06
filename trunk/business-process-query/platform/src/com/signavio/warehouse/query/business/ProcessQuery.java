@@ -94,7 +94,7 @@ public class ProcessQuery extends Process{
 		Connection db;
 		try {
 			db = BaseGateway.getConnection();
-			QueryDetailsGateway.insertNeighbors(db, this.getProcessID(), this.queryNo, this.targetProcess, this.targetTask, this.zone, this.queryDesc);
+			QueryDetailsGateway.insert(db, this.getProcessID(), this.queryNo, this.targetProcess, this.targetTask, this.zone, this.queryDesc);
 			db.close();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block

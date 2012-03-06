@@ -2,7 +2,7 @@ ORYX.I18N.PropertyWindow.dateFormat = "d/m/y";
 
 ORYX.I18N.View.East = "Attributes";
 ORYX.I18N.View.West = "Modeling Elements";
-ORYX.I18N.View.South = "Process query";
+ORYX.I18N.View.South = "BPMN query";
 ORYX.I18N.View.SouthQuery = "Referent Process";
 ORYX.I18N.Oryx.title	= "Signavio";
 ORYX.I18N.Oryx.pleaseWait = "Please wait while the Signavio Process Editor is loading...";

@@ -24,6 +24,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.signavio.warehouse.query.gateway.AB3CCollectionGateway;
+import com.signavio.warehouse.query.gateway.ProcessDirGateway;
 import com.signavio.warehouse.query.gateway.ServiceNeighborsGateway;
 import com.signavio.warehouse.query.gateway.util.BaseGateway;
 import com.signavio.warehouse.query.util.XMLUtil;
@@ -42,6 +43,16 @@ public class Process {
 	private String jsonRepresentation;
 
 	private int noOfQuery;
+
+	private String directory;
+	
+	public String getDirectory() {
+		return directory;
+	}
+
+	public void setDirectory(String directory) {
+		this.directory = directory;
+	}
 
 	public int getNoOfQuery() {
 		return noOfQuery;
@@ -146,7 +157,6 @@ public class Process {
 		// e.printStackTrace();
 		// } catch (IllegalAccessException e) {
 		// // TODO Auto-generated catch block
-		// e.printStackTrace();
 		// } catch (ClassNotFoundException e) {
 		// // TODO Auto-generated catch block
 		// e.printStackTrace();
@@ -1250,6 +1260,116 @@ public class Process {
 	public void persist() {
 		for (Activity activity : this.activities) {
 			activity.persist(this.processID);
+		}
+	}
+	
+	public void persistDir() {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			ProcessDirGateway.insert(db, this.processID, this.directory);
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public String getDirFromDB() {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			ResultSet rs = ProcessDirGateway.findByID(db, this.processID);
+			if(rs.next()){
+				this.setDirectory(rs.getString("dir"));
+			}
+			rs.close();
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return this.getDirectory();
+	}
+	
+	public void updateDir() {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			ProcessDirGateway.update(db, this.processID, this.directory);
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void deleteDir() {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			ProcessDirGateway.delete(db, this.processID);
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void deleteDirByProcessIDStatic(String processId) {
+		Connection db;
+		try {
+			db = BaseGateway.getConnection();
+			ProcessDirGateway.delete(db, processId);
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

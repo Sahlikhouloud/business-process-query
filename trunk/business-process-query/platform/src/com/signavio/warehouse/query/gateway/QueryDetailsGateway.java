@@ -9,7 +9,7 @@ public class QueryDetailsGateway {
 	private static final String insertStatement = "INSERT INTO query_details (processid, query_no, target_process, target_task, zone, description, is_initiated) "
 			+ "VALUES (?, ?, ?, ?, ?, ?, ?) ";
 
-	public static boolean insertNeighbors(Connection db, String processID,
+	public static boolean insert(Connection db, String processID,
 			int queryNo, String targetProcess, String targetTask, int zone,
 			String desc) throws SQLException, InstantiationException,
 			IllegalAccessException, ClassNotFoundException {

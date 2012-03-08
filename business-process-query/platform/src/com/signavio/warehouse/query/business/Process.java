@@ -16,6 +16,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -1509,5 +1512,42 @@ public class Process {
 			isNewProcess = true;
 		}
 		return isNewProcess;
+	}
+	
+	public static JSONObject getAlltasksWithNoOfTimeTheyAreUsed(){
+		Connection db;
+		JSONObject root = new JSONObject();
+		try {
+			db = BaseGateway.getConnection();
+			ResultSet rs = AB3CCollectionGateway.findAllActivitiesWithNoOfTimes(db);
+			JSONArray jsons = new JSONArray();
+			while (rs.next()) {
+				JSONObject json = new JSONObject();
+					String name = rs.getString("name");
+					int times = rs.getInt("no_of_times");
+					json.put("taskName", name);
+					json.put("noOfTime", name + " ("+times+")");
+				jsons.put(json);
+			}
+			root.put("tasks", jsons);
+			rs.close();
+			db.close();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return root;
 	}
 }

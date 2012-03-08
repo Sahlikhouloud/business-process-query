@@ -104,4 +104,18 @@ public class AB3CCollectionGateway {
 		// stmt.close();
 		return result;
 	}
+	
+	private static final String selectAllActivitiesWithNoOfTimes = "SELECT name, count(*) no_of_times " +
+						" FROM AB3C_collection " + 
+						" WHERE processid not in (select distinct(q.processid) from query_details q) " + 
+						" and type in ('task', 'subProcess') " +
+						" group by name " +
+						" order by no_of_times desc ";
+	
+	public static ResultSet findAllActivitiesWithNoOfTimes(Connection db) throws SQLException{
+		PreparedStatement stmt = db.prepareStatement(selectAllActivitiesWithNoOfTimes);
+		ResultSet result = stmt.executeQuery();
+		// stmt.close();
+		return result;
+	}
 }

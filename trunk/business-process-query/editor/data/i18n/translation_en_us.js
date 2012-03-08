@@ -210,10 +210,13 @@ if(!ORYX.I18N.Query) ORYX.I18N.Query = {};
 
 ORYX.I18N.Query.group = "Query";
 ORYX.I18N.Query.query = "Query";
-ORYX.I18N.Query.queryAltDesc = "Get a referent process based on current process fragment  (Ctrl+Alt+Q)";
+ORYX.I18N.Query.queryAltDesc = "Get a referent process based on current process fragment (Ctrl+Alt+Q)";
 ORYX.I18N.Query.queryDesc = "Specify your query";
 ORYX.I18N.Query.newQuery = "New query";
-ORYX.I18N.Query.newQueryAltDesc = "Get a referent process based on a new query process fragment  (Ctrl+Shift+Alt+Q)";
+ORYX.I18N.Query.newQueryAltDesc = "Get a referent process based on a new query process fragment (Ctrl+Shift+Alt+Q)";
+ORYX.I18N.Query.searchActivity = "Search activities";
+ORYX.I18N.Query.searchActivityAltDesc = "Reuse existing activities (Ctrl+Alt+E)";
+ORYX.I18N.Query.searchActivityDesc = "You can reuse an activity by searching and selecting from the textbox below ... ";
 ORYX.I18N.Query.newQueryDesc = "Create new query";
 ORYX.I18N.Query.backBtn = "Back";
 ORYX.I18N.Query.selectBtn = "Show";
@@ -253,6 +256,7 @@ ORYX.I18N.Query.updateInitStatusFailure = "There was an exception updating init 
 ORYX.I18N.Query.noSelectedQuery = "Please select a query first!";
 ORYX.I18N.Query.deleteQueryTitle = "Delete a query";
 ORYX.I18N.Query.deleteQueryMsg = "Do you want to delete this query?";
+ORYX.I18N.Query.noSelectedTaskMsg = "Please specify one target task";
 
 if(!ORYX.I18N.View) ORYX.I18N.View = {};
 

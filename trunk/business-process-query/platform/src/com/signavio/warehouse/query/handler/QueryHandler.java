@@ -61,9 +61,20 @@ public class QueryHandler extends BasisHandler {
 			this.getInitQuery(jParams, res);
 		} else if(jobDesc.equals("getAllQueries")){
 			this.getAllQueries(jParams, res);
+		} else if(jobDesc.equals("getAllTasks")){
+			this.getAllTasks(jParams, res);
 		}
 	}
 	
+	private void getAllTasks(JSONObject jParams, HttpServletResponse res){
+		try {
+			JSONObject taskJSON = Process.getAlltasksWithNoOfTimeTheyAreUsed();
+			res.getWriter().write(taskJSON.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	private void getAllQueries(JSONObject jParams, HttpServletResponse res){
 		try {

@@ -39,6 +39,9 @@ import com.signavio.platform.security.business.FsSecurityManager;
 import com.signavio.warehouse.business.FsEntityManager;
 import com.signavio.warehouse.directory.business.FsDirectory;
 import com.signavio.warehouse.model.business.FsModel;
+import com.signavio.warehouse.query.business.Process;
+import com.signavio.warehouse.query.business.ProcessQuery;
+import com.signavio.warehouse.query.util.FileUtil;
 
 
 
@@ -85,7 +88,19 @@ public class DirectoryHandler extends BasisHandler {
 		for (FsModel childModel : directory.getChildModels()) {
 			JSONObject jModel = this.getModelInfo(childModel);
 			if(jModel != null) {
-				rep.put( this.getModelInfo(childModel));
+				// not to show query process... 
+				// added by Nattawat Nonsung
+				try {
+					JSONObject repObject = jModel.getJSONObject("rep");
+					Process process = new Process(repObject.getString("name"));
+					if(!process.isQueryProcess()){
+						rep.put( this.getModelInfo(childModel));
+					}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		}
 		

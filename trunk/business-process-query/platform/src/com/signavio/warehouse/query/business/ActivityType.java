@@ -1,7 +1,10 @@
 package com.signavio.warehouse.query.business;
 
 public enum ActivityType {
-	startEvent, sequenceFlow, endEvent, exclusiveGateway, parallelGateway, task, subProcess, inclusiveGateway;
+	startEvent, intermediateCatchEvent, intermediateThrowEvent, endEvent, 
+	sequenceFlow,  
+	task, subProcess, 
+	exclusiveGateway, parallelGateway, inclusiveGateway, eventBasedGateway, complexGateway;
 	
 	public static boolean contains(String type) {
 

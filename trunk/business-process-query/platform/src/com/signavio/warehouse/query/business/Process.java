@@ -590,6 +590,10 @@ public class Process {
 		} else if (gateway.getType() == ActivityType.task
 				|| gateway.getType() == ActivityType.subProcess) {
 			gatewayPattern = "s";
+		} else if (gateway.getType() == ActivityType.intermediateCatchEvent) {
+			gatewayPattern = "catch";
+		} else if (gateway.getType() == ActivityType.intermediateThrowEvent) {
+			gatewayPattern = "throw";
 		} else { // any gateway
 			if (gateway.getType() == ActivityType.exclusiveGateway) {
 				gatewayPattern = "XOR";
@@ -597,6 +601,10 @@ public class Process {
 				gatewayPattern = "OR";
 			} else if (gateway.getType() == ActivityType.parallelGateway) {
 				gatewayPattern = "AND";
+			} else if (gateway.getType() == ActivityType.eventBasedGateway) {
+				gatewayPattern = "EVENT";
+			} else if (gateway.getType() == ActivityType.complexGateway) {
+				gatewayPattern = "COMPLEX";
 			}
 
 			int postLink = 0, preLink = 0;
@@ -639,7 +647,11 @@ public class Process {
 				// encode first pattern
 				if (sequence.getSource().getType() == ActivityType.exclusiveGateway
 						|| sequence.getSource().getType() == ActivityType.inclusiveGateway
-						|| sequence.getSource().getType() == ActivityType.parallelGateway) {
+						|| sequence.getSource().getType() == ActivityType.parallelGateway
+						|| sequence.getSource().getType() == ActivityType.eventBasedGateway
+						|| sequence.getSource().getType() == ActivityType.intermediateCatchEvent
+						|| sequence.getSource().getType() == ActivityType.complexGateway
+						|| sequence.getSource().getType() == ActivityType.intermediateThrowEvent) {
 					pattern += "||"
 							+ this.findStack(sequence.getSource())
 									.getGatewayPattern() + ",";
@@ -650,12 +662,16 @@ public class Process {
 					pattern += "||end,";
 				} else if (sequence.getSource().getType() == ActivityType.startEvent) {
 					pattern += "||start,";
-				}
+				} 
 
 				// encode second pattern
 				if (sequence.getTarget().getType() == ActivityType.exclusiveGateway
 						|| sequence.getTarget().getType() == ActivityType.inclusiveGateway
-						|| sequence.getTarget().getType() == ActivityType.parallelGateway) {
+						|| sequence.getTarget().getType() == ActivityType.parallelGateway
+						|| sequence.getTarget().getType() == ActivityType.eventBasedGateway
+						|| sequence.getTarget().getType() == ActivityType.intermediateCatchEvent
+						|| sequence.getTarget().getType() == ActivityType.complexGateway
+						|| sequence.getTarget().getType() == ActivityType.intermediateThrowEvent) {
 					pattern += this.findStack(sequence.getTarget())
 							.getGatewayPattern();
 				} else if (sequence.getTarget().getType() == ActivityType.task
@@ -692,7 +708,11 @@ public class Process {
 				// encode first pattern
 				if (sequence.getSource().getType() == ActivityType.exclusiveGateway
 						|| sequence.getSource().getType() == ActivityType.inclusiveGateway
-						|| sequence.getSource().getType() == ActivityType.parallelGateway) {
+						|| sequence.getSource().getType() == ActivityType.parallelGateway
+						|| sequence.getSource().getType() == ActivityType.eventBasedGateway
+						|| sequence.getSource().getType() == ActivityType.intermediateCatchEvent
+						|| sequence.getSource().getType() == ActivityType.complexGateway
+						|| sequence.getSource().getType() == ActivityType.intermediateThrowEvent) {
 					pattern += "||"
 							+ this.findStack(sequence.getSource())
 									.getGatewayPattern() + ",";
@@ -711,7 +731,11 @@ public class Process {
 				// encode second pattern
 				if (sequence.getTarget().getType() == ActivityType.exclusiveGateway
 						|| sequence.getTarget().getType() == ActivityType.inclusiveGateway
-						|| sequence.getTarget().getType() == ActivityType.parallelGateway) {
+						|| sequence.getTarget().getType() == ActivityType.parallelGateway
+						|| sequence.getTarget().getType() == ActivityType.eventBasedGateway
+						|| sequence.getTarget().getType() == ActivityType.intermediateCatchEvent
+						|| sequence.getTarget().getType() == ActivityType.complexGateway
+						|| sequence.getTarget().getType() == ActivityType.intermediateThrowEvent) {
 					pattern += this.findStack(sequence.getTarget())
 							.getGatewayPattern();
 				} else if (sequence.getTarget().getType() == ActivityType.task
@@ -1202,7 +1226,7 @@ public class Process {
 							activity.setName(eActivity.getAttribute("name"));
 							this.addActivity(activity);
 
-							if (activity.getType() == ActivityType.task
+							if ((activity.getType() == ActivityType.task || activity.getType() == ActivityType.subProcess) 
 									&& (activity.getName() == null || activity
 											.getName().equals(""))) {
 								return "Cannot share a process containing unnamed task!";
@@ -1218,7 +1242,7 @@ public class Process {
 				Element eProcessXML = (Element) processXML;
 				NodeList sequences = eProcessXML
 						.getElementsByTagName("sequenceFlow");
-				System.out.println("length : " + sequences.getLength());
+//				System.out.println("length : " + sequences.getLength());
 				for (int i = 0; i < sequences.getLength(); i++) {
 					Node nActivity = sequences.item(i);
 					if (nActivity.getNodeType() == Node.ELEMENT_NODE) {

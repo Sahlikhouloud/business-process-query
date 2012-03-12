@@ -42,7 +42,7 @@ ORYX.Plugins.NewQuery = Clazz.extend({
 									return true;
 								}
 							  }.bind(this),
-			index			: 2
+			index			: 3
 		}); 
 
 		// Register on event for key down --> store all commands in a stack		 

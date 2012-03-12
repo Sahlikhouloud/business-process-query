@@ -5,9 +5,14 @@ public class Configuration {
 //	private static final String CONFIG_FILENAME = "../config.xml";
 
     private String dbDriverName = "com.mysql.jdbc.Driver";
+    
     private String dbUser = "root";
     private String dbPassword = "asadmin";
     private String dbURI = "jdbc:mysql://localhost/process_query";
+    
+//    private String dbUser = "nattawat";
+//    private String dbPassword = "nattawat";
+//    private String dbURI = "jdbc:mysql://157.159.110.224:3306/nattawat_db";
 
     private int dbPoolMinSize = 30;
     private int dbPoolMaxSize = 100;

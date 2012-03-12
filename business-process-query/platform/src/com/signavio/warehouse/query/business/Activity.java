@@ -73,6 +73,14 @@ public class Activity {
 			this.type = ActivityType.subProcess;
 		else if (typeString.equals(ActivityType.task.toString()))
 			this.type = ActivityType.task;
+		else if (typeString.equals(ActivityType.intermediateCatchEvent.toString()))
+			this.type = ActivityType.intermediateCatchEvent;
+		else if (typeString.equals(ActivityType.eventBasedGateway.toString()))
+			this.type = ActivityType.eventBasedGateway;
+		else if (typeString.equals(ActivityType.complexGateway.toString()))
+			this.type = ActivityType.complexGateway;
+		else if (typeString.equals(ActivityType.intermediateThrowEvent.toString()))
+			this.type = ActivityType.intermediateThrowEvent;
 	}
 
 	public Activity getSource() {

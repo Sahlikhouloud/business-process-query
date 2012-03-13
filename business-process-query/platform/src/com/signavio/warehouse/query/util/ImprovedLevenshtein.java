@@ -2,6 +2,10 @@ package com.signavio.warehouse.query.util;
 
 public class ImprovedLevenshtein {
 
+	public static final String[] gatewaysCoveredByImprovedWeight = {
+			"AND-split", "AND-join", "OR-split", "OR-join", "XOR-split",
+			"XOR-join", "seq" };
+
 	// receive pattern having not been encoded yet
 	public static double directLinkPatternMatching(String pattern1,
 			String pattern2, int noOfBranches1, int noOfBranches2) {
@@ -12,8 +16,8 @@ public class ImprovedLevenshtein {
 					noOfBranches2);
 			result = histogramEqualization(result);
 		} else {
-			result = Levenshtein.directLinkPatternMatching(
-					Encoding.encode(pattern1), Encoding.encode(pattern2));
+			result = LevenshteinForPatterns.directLinkPatternMatching(pattern1,
+					pattern2);
 		}
 
 		return result;
@@ -22,7 +26,9 @@ public class ImprovedLevenshtein {
 	public static boolean canApplySimOfGateway(String pattern1, String pattern2) {
 		boolean canApply = false;
 
-		if (isOneSequencialPatternWithTheSameDirection(pattern1, pattern2)) {
+		if (isOneSequencialPatternWithTheSameDirection(pattern1, pattern2)
+				&& isCoveredByImprovedWeight(pattern1)
+				&& isCoveredByImprovedWeight(pattern2)) {
 			canApply = true;
 		}
 		return canApply;
@@ -145,5 +151,19 @@ public class ImprovedLevenshtein {
 		} else {
 			return atomicPatterns[0].split(",")[0];
 		}
+	}
+
+	public static boolean isCoveredByImprovedWeight(String pattern) {
+		String[] atomicPatterns = pattern.split("\\|\\|");
+		boolean isCovered = false;
+		for (int i = 0; i < ImprovedLevenshtein.gatewaysCoveredByImprovedWeight.length; i++) {
+			if ((atomicPatterns[0].split(",")[0]
+					.equals(ImprovedLevenshtein.gatewaysCoveredByImprovedWeight[i]))
+					|| (atomicPatterns[0].split(",")[1]
+							.equals(ImprovedLevenshtein.gatewaysCoveredByImprovedWeight[i]))) {
+				isCovered = true;
+			}
+		}
+		return isCovered;
 	}
 }

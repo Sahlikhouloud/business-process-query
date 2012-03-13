@@ -31,11 +31,10 @@ public class ContextMatching {
 						// common neighbors
 						double matchingResult = 0.0;
 						if (!considerSimOfGateway) {
-							matchingResult = Levenshtein
-									.directLinkPatternMatching(Encoding
-											.encode(neighbor1.getPattern()),
-											Encoding.encode(neighbor2
-													.getPattern()));
+							matchingResult = LevenshteinForPatterns
+									.directLinkPatternMatching(
+											neighbor1.getPattern(),
+											neighbor2.getPattern());
 						} else {
 							matchingResult = ImprovedLevenshtein
 									.directLinkPatternMatching(
@@ -43,15 +42,22 @@ public class ContextMatching {
 											neighbor2.getPattern(),
 											neighbor1.getNoOfBranches(),
 											neighbor2.getNoOfBranches());
-							if(String.valueOf(matchingResult).equals("Infinity")){
-								System.out.println("from : "+neighbor1.getFromTask());
-								System.out.println("to : "+ neighbor1.getToTask());
-								System.out.println("with : "+ neighbor1.getPattern());
-								
+							if (String.valueOf(matchingResult).equals(
+									"Infinity")) {
+								System.out.println("from : "
+										+ neighbor1.getFromTask());
+								System.out.println("to : "
+										+ neighbor1.getToTask());
+								System.out.println("with : "
+										+ neighbor1.getPattern());
+
 								System.out.println("--------------------");
-								System.out.println("from : "+neighbor2.getFromTask());
-								System.out.println("to : "+ neighbor2.getToTask());
-								System.out.println("with : "+ neighbor2.getPattern());
+								System.out.println("from : "
+										+ neighbor2.getFromTask());
+								System.out.println("to : "
+										+ neighbor2.getToTask());
+								System.out.println("with : "
+										+ neighbor2.getPattern());
 							}
 						}
 
@@ -98,12 +104,10 @@ public class ContextMatching {
 						if (samePair == 1) {
 							// common neighbors
 							if (!considerSimOfGateway) {
-								matchingResult = Levenshtein
+								matchingResult = LevenshteinForPatterns
 										.directLinkPatternMatching(
-												Encoding.encode(neighbor1
-														.getPattern()),
-												Encoding.encode(neighbor2
-														.getPattern()));
+												neighbor1.getPattern(),
+												neighbor2.getPattern());
 							} else {
 								matchingResult = ImprovedLevenshtein
 										.directLinkPatternMatching(
@@ -118,11 +122,9 @@ public class ContextMatching {
 							String pattern = rewardPattern(neighbor2
 									.getPattern());
 							if (!considerSimOfGateway) {
-								matchingResult = Levenshtein
+								matchingResult = LevenshteinForPatterns
 										.directLinkPatternMatching(
-												Encoding.encode(neighbor1
-														.getPattern()),
-												Encoding.encode(pattern));
+												neighbor1.getPattern(), pattern);
 							} else {
 								matchingResult = ImprovedLevenshtein
 										.directLinkPatternMatching(

@@ -232,6 +232,7 @@ ORYX.I18N.Query.queryResultsSVGDesc = "Graphical representation of a similar tas
 ORYX.I18N.Query.createdNewQueryDesc = "A new query process is stored under";
 ORYX.I18N.Query.inputTabDesc = "Queries";
 ORYX.I18N.Query.outputTabDesc = "Results";
+ORYX.I18N.Query.unInitQuery = "This query has not been initiated yet, please edit and save a query to initiate it!";
 
 ORYX.I18N.Query.dialogDesciption = "Please specify your query";
 ORYX.I18N.Query.pleaseWait = "Processing";

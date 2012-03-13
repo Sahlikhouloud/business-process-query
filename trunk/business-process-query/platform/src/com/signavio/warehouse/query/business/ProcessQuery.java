@@ -276,7 +276,7 @@ public class ProcessQuery extends Process{
 		JSONArray queriesJSON = new JSONArray();
 		try {
 			for(ProcessQuery query : queries){
-				if(query.isInitiated()){
+//				if(query.isInitiated()){
 					JSONObject queryJSON = new JSONObject();
 					queryJSON.put("processID", query.getProcessID());
 					queryJSON.put("text", query.getProcessID());
@@ -288,7 +288,7 @@ public class ProcessQuery extends Process{
 					queryJSON.put("queryNo", query.getQueryNo());
 					queryJSON.put("isInitiated", query.isInitiated());
 					queriesJSON.put(queryJSON);
-				}
+//				}
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

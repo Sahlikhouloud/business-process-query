@@ -71,7 +71,7 @@ public class Activity {
 			this.type = ActivityType.startEvent;
 		else if (typeString.equals(ActivityType.subProcess.toString()))
 			this.type = ActivityType.subProcess;
-		else if (typeString.equals(ActivityType.task.toString()))
+		else if (isAnyKindOfTask(typeString)) // check for all kind of task
 			this.type = ActivityType.task;
 		else if (typeString.equals(ActivityType.intermediateCatchEvent.toString()))
 			this.type = ActivityType.intermediateCatchEvent;
@@ -83,6 +83,11 @@ public class Activity {
 			this.type = ActivityType.intermediateThrowEvent;
 	}
 
+	public boolean isAnyKindOfTask(String typeString){
+		String lastFour = typeString.substring(typeString.length()-4, typeString.length());
+		return lastFour.equalsIgnoreCase(ActivityType.task.toString());
+	}
+	
 	public Activity getSource() {
 		return source;
 	}

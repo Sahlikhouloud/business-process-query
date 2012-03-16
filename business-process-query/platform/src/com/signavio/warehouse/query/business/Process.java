@@ -1209,67 +1209,68 @@ public class Process {
 
 			// always contain only one process tag
 			NodeList processes = doc.getElementsByTagName("process");
-			Node processXML = processes.item(0);
-			if (processXML != null
-					&& processXML.getNodeType() == Node.ELEMENT_NODE) {
-				NodeList processDetails = processXML.getChildNodes();
-				for (int i = 0; i < processDetails.getLength(); i++) {
-					Node nActivity = processDetails.item(i);
-					if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
-						Element eActivity = (Element) nActivity;
-						if (ActivityType.contains(eActivity.getNodeName())
-								&& !eActivity.getNodeName().equals(
-										ActivityType.sequenceFlow.toString())) {
-							Activity activity = new Activity();
-							activity.setId(eActivity.getAttribute("id"));
-							activity.setType(eActivity.getNodeName());
-							activity.setName(eActivity.getAttribute("name"));
-							this.addActivity(activity);
+			for(int index=0; index<processes.getLength(); index++){
+				Node processXML = processes.item(index);
+				if (processXML != null
+						&& processXML.getNodeType() == Node.ELEMENT_NODE) {
+					NodeList processDetails = processXML.getChildNodes();
+					for (int i = 0; i < processDetails.getLength(); i++) {
+						Node nActivity = processDetails.item(i);
+						if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
+							Element eActivity = (Element) nActivity;
+							if (ActivityType.contains(eActivity.getNodeName())
+									&& !eActivity.getNodeName().equals(
+											ActivityType.sequenceFlow.toString())) {
+								Activity activity = new Activity();
+								activity.setId(eActivity.getAttribute("id"));
+								activity.setType(eActivity.getNodeName());
+								activity.setName(eActivity.getAttribute("name"));
+								this.addActivity(activity);
 
-							if ((activity.getType() == ActivityType.task || activity.getType() == ActivityType.subProcess) 
-									&& (activity.getName() == null || activity
-											.getName().equals(""))) {
-								return "Cannot share a process containing unnamed task!";
-							}
-						}
-					}
-				}
-			}
-
-			// adding source and target ref to each sequence
-			if (processXML != null
-					&& processXML.getNodeType() == Node.ELEMENT_NODE) {
-				Element eProcessXML = (Element) processXML;
-				NodeList sequences = eProcessXML
-						.getElementsByTagName("sequenceFlow");
-//				System.out.println("length : " + sequences.getLength());
-				for (int i = 0; i < sequences.getLength(); i++) {
-					Node nActivity = sequences.item(i);
-					if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
-						Element eActivity = (Element) nActivity;
-						if (eActivity.getNodeName().equals(
-								ActivityType.sequenceFlow.toString())) {
-							Activity activity = new Activity();
-							activity.setId(eActivity.getAttribute("id"));
-							activity.setType(eActivity.getNodeName());
-							activity.setName(eActivity.getAttribute("name"));
-							for (Activity tActivity : this.activities) {
-								String sourceRef = eActivity
-										.getAttribute("sourceRef");
-								String targetRef = eActivity
-										.getAttribute("targetRef");
-								if (tActivity.getId().equals(sourceRef)) {
-									activity.setSource(tActivity);
-								} else if (tActivity.getId().equals(targetRef)) {
-									activity.setTarget(tActivity);
+								if ((activity.getType() == ActivityType.task || activity.getType() == ActivityType.subProcess) 
+										&& (activity.getName() == null || activity
+												.getName().equals(""))) {
+									return "Cannot share a process containing unnamed task!";
 								}
 							}
-							this.addActivity(activity);
+						}
+					}
+				}
+
+				// adding source and target ref to each sequence
+				if (processXML != null
+						&& processXML.getNodeType() == Node.ELEMENT_NODE) {
+					Element eProcessXML = (Element) processXML;
+					NodeList sequences = eProcessXML
+							.getElementsByTagName("sequenceFlow");
+//					System.out.println("length : " + sequences.getLength());
+					for (int i = 0; i < sequences.getLength(); i++) {
+						Node nActivity = sequences.item(i);
+						if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
+							Element eActivity = (Element) nActivity;
+							if (eActivity.getNodeName().equals(
+									ActivityType.sequenceFlow.toString())) {
+								Activity activity = new Activity();
+								activity.setId(eActivity.getAttribute("id"));
+								activity.setType(eActivity.getNodeName());
+								activity.setName(eActivity.getAttribute("name"));
+								for (Activity tActivity : this.activities) {
+									String sourceRef = eActivity
+											.getAttribute("sourceRef");
+									String targetRef = eActivity
+											.getAttribute("targetRef");
+									if (tActivity.getId().equals(sourceRef)) {
+										activity.setSource(tActivity);
+									} else if (tActivity.getId().equals(targetRef)) {
+										activity.setTarget(tActivity);
+									}
+								}
+								this.addActivity(activity);
+							}
 						}
 					}
 				}
 			}
-
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

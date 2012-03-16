@@ -29,6 +29,7 @@ public class QueryHandler extends BasisHandler {
 		super(servletContext);
 	}
 
+	//////////////// DO GET ///////////////////////////////////////////////
 	/**
 	 * Overwrite
 	 */
@@ -244,6 +245,7 @@ public class QueryHandler extends BasisHandler {
 		}
 	}
 
+	/////////    DO POST //////////////////////////////////////
 	/**
 	 * Overwrite
 	 */
@@ -341,6 +343,8 @@ public class QueryHandler extends BasisHandler {
 			e.printStackTrace();
 		}
 	}
+	
+	/////////    DO PUT //////////////////////////////////////
 
 	/**
 	 * Overwrite

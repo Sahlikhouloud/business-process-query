@@ -95,11 +95,51 @@ public class ContextMatching {
 					.getNeighborsFromSpecificZone(i);
 			List<Neighbor> neighborOfCompared = comparedTask
 					.getNeighborsFromSpecificZone(i);
+			List<Neighbor> neighborOfTargetInNextZone = targetTask
+					.getNeighborsFromSpecificZone(i + 1);
+			List<Neighbor> neighborOfComparedInNextZone = comparedTask
+					.getNeighborsFromSpecificZone(i + 1);
 			if (neighborOfCompared != null && neighborOfTarget != null) {
 				for (Neighbor neighbor1 : neighborOfTarget) {
+					// check that this neighbor is the pair of the same layer or
+					// it connects between layers
+					boolean isPairBetweenDifLayer = false;
+					if (neighborOfTargetInNextZone != null) {
+						for (int x = 0; x < neighborOfTargetInNextZone.size(); x++) {
+							Neighbor neighborNextzone = neighborOfTargetInNextZone
+									.get(x);
+							if (neighbor1.getToTask().equals(
+									neighborNextzone.getFromTask())) {
+								isPairBetweenDifLayer = true;
+								break;
+							}
+						}
+					}
+
 					for (int j = 0; j < neighborOfCompared.size(); j++) {
 						Neighbor neighbor2 = neighborOfCompared.get(j);
-						int samePair = isTheSamePair(neighbor1, neighbor2);
+						// check that this neighbor is the pair of the same
+						// layer or
+						// it connects between layers
+						if (!isPairBetweenDifLayer
+								&& neighborOfComparedInNextZone != null) {
+							for (int x = 0; x < neighborOfComparedInNextZone
+									.size(); x++) {
+								Neighbor neighborNextzone = neighborOfComparedInNextZone
+										.get(x);
+								if (neighbor2.getToTask().equals(
+										neighborNextzone.getFromTask())) {
+									isPairBetweenDifLayer = true;
+									break;
+								}
+							}
+						}
+
+						int samePair = 0;
+						if (!isPairBetweenDifLayer) {
+							samePair = isTheSamePair(neighbor1, neighbor2);
+						}
+
 						double matchingResult = 0.0;
 						if (samePair == 1) {
 							// common neighbors
@@ -235,6 +275,7 @@ public class ContextMatching {
 	 * opposite direction, 3 means not the same
 	 */
 	public static int isTheSamePair(Neighbor neighbor1, Neighbor neighbor2) {
+
 		int result = 0;
 		if (neighbor1.getFromTask().equals(neighbor2.getFromTask())
 				&& neighbor1.getToTask().equals(neighbor2.getToTask())) {

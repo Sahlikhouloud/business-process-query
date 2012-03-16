@@ -70,6 +70,16 @@ ORYX.Plugins.Query = Clazz.extend({
 		});
 	},
 	
+	findAllTasks: function (tasks, children){
+		for(var i=0; i<children.length; i++){
+			if(children[i].stencil.id == 'Pool' || children[i].stencil.id == 'Lane'){
+				this.findAllTasks(tasks, children[i].childShapes);
+			}else if(children[i].stencil.id == 'Task' || children[i].stencil.id == 'CollapsedSubprocess'){
+		    	tasks.push(children[i].properties.name);
+		    }
+		}
+	},
+	
 	/**
 	 * Does the querying
 	 * 
@@ -86,17 +96,19 @@ ORYX.Plugins.Query = Clazz.extend({
 			var modelJSON = this.facade.getJSON();
 			var canvasChilds  = modelJSON.childShapes;
 			var tasks = [];
-			for(var i=0; i<canvasChilds.length; i++){
-			    if(canvasChilds[i].stencil.id == 'Task' || canvasChilds[i].stencil.id == 'CollapsedSubprocess'){
-			    	tasks.push(canvasChilds[i].properties.name);
-			    }
-		    }
+			this.findAllTasks(tasks, canvasChilds);
 			
-			var taskTxt = "[";
+			var taskTxt = "";
+			if(tasks.length > 0){
+				taskTxt = "["
+			}
 			for(i=0; i<tasks.length; i++){
 				taskTxt+="['"+tasks[i].strip()+"', '"+tasks[i].strip()+"'],";
 		    }
-			taskTxt = taskTxt.substring(0,taskTxt.length-1)+"]";
+			if(tasks.length > 0){
+				taskTxt = taskTxt.substring(0,taskTxt.length-1)+"]";
+			}
+			
 			
 			// Get the stencilset
 			var ss = this.facade.getStencilSets().values()[0]

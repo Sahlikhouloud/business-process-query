@@ -48,7 +48,7 @@ public class Process {
 	private int noOfQuery;
 
 	private String directory;
-	
+
 	public String getDirectory() {
 		return directory;
 	}
@@ -662,7 +662,7 @@ public class Process {
 					pattern += "||end,";
 				} else if (sequence.getSource().getType() == ActivityType.startEvent) {
 					pattern += "||start,";
-				} 
+				}
 
 				// encode second pattern
 				if (sequence.getTarget().getType() == ActivityType.exclusiveGateway
@@ -1038,9 +1038,71 @@ public class Process {
 		this.setJsonRepresentation(jsonTxt);
 	}
 
+	private NodeList getChlidGroup(String className, Element element) {
+		NodeList results = null;
+		NodeList nGRootChilds = element.getChildNodes();
+		for (int j = 0; j < nGRootChilds.getLength(); j++) {
+			Node nGRootChild = nGRootChilds.item(j);
+			if (nGRootChild.getNodeType() == Node.ELEMENT_NODE) {
+				Element eRootChild = (Element) nGRootChild;
+				if (eRootChild.getNodeName().equals("g")
+						&& eRootChild.getAttribute("class").equals("stencils")) {
+					NodeList nStencilChilds = eRootChild.getChildNodes();
+					for (int k = 0; k < nStencilChilds.getLength(); k++) {
+						Node nStencilChild = nStencilChilds.item(k);
+						if (nStencilChild.getNodeType() == Node.ELEMENT_NODE) {
+							Element eStencilChild = (Element) nStencilChild;
+							if (eStencilChild.getNodeName().equals("g")
+									&& (eStencilChild.getAttribute("class")
+											.equals(className))) {
+								results = eStencilChild.getChildNodes();
+							}
+						}
+					}
+				}
+			}
+		}
+		return results;
+	}
+
+	String clickRes = "if(this.getAttribute('value') == 0)"
+		+ "{"
+		+ "this.setAttribute('value',1);"
+		+ "this.setAttribute('opacity','0.3');"
+		+ "document.getElementById('selectedSVGCmp').value+=this.id+',';"
+		+ "}"
+		+ "else{"
+		+ "this.setAttribute('value',0);"
+		+ "this.setAttribute('opacity','1');"
+		+ "var ids = document.getElementById('selectedSVGCmp').value.split(',');"
+		+ "var tempIDs = ''; " + "for(var i=0; i<ids.length-1; i++){"
+		+ "if(this.id != ids[i]){" + "tempIDs+=ids[i]+',';" + "}" + "}"
+		+ "document.getElementById('selectedSVGCmp').value = tempIDs;"
+		+ "}";
+
+	private void addJSToLeafNode(NodeList nCmps, Element eCmp) {
+		if(nCmps.getLength()>0){
+			for (int n = 0; n < nCmps.getLength(); n++) {
+				Node nCmp = nCmps.item(n);
+				if (nCmp.getNodeType() == Node.ELEMENT_NODE) {
+					Element eSubCmp = (Element) nCmp;
+					NodeList nSubCmps = this.getChlidGroup("children", eSubCmp);
+					this.addJSToLeafNode(nSubCmps, eSubCmp);
+				}
+			}
+		}else{
+			eCmp.setAttribute("onclick", clickRes);
+			eCmp.setAttribute("onmouseover",
+					"this.style.cursor='pointer';");
+			eCmp.setAttribute("value", "0");
+			eCmp.setAttribute("filter", "");
+		}
+	}
+
 	public void createInteractiveSvgRepresentation() {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
+		
 		try {
 			dBuilder = dbFactory.newDocumentBuilder();
 			InputSource is = new InputSource();
@@ -1054,99 +1116,51 @@ public class Process {
 				if (nSvgChild.getNodeType() == Node.ELEMENT_NODE) {
 					Element eSvgChild = (Element) nSvgChild;
 					if (eSvgChild.getNodeName().equals("g")) { // root group
-						NodeList nGRootChilds = eSvgChild.getChildNodes();
-						for (int j = 0; j < nGRootChilds.getLength(); j++) {
-							Node nGRootChild = nGRootChilds.item(j);
-							if (nGRootChild.getNodeType() == Node.ELEMENT_NODE) {
-								Element eRootChild = (Element) nGRootChild;
-								if (eRootChild.getNodeName().equals("g")
-										&& eRootChild.getAttribute("class")
-												.equals("stencils")) {
-									NodeList nStencilChilds = eRootChild
-											.getChildNodes();
-									for (int k = 0; k < nStencilChilds
-											.getLength(); k++) {
-										Node nStencilChild = nStencilChilds
-												.item(k);
-										if (nStencilChild.getNodeType() == Node.ELEMENT_NODE) {
-											Element eStencilChild = (Element) nStencilChild;
-											if (eStencilChild.getNodeName()
-													.equals("g")
-													&& (eStencilChild
-															.getAttribute(
-																	"class")
-															.equals("children") || eStencilChild
-															.getAttribute(
-																	"class")
-															.equals("edge"))) {
 
-												NodeList nComponents = eStencilChild
-														.getChildNodes();
-												for (int m = 0; m < nComponents
-														.getLength(); m++) {
-													Node nComponent = nComponents
-															.item(m);
-													if (nComponent
-															.getNodeType() == Node.ELEMENT_NODE) {
-														Element eComponent = (Element) nComponent;
-														if (eComponent
-																.getNodeName()
-																.equals("g")) {
-															// add new attribute
-															// into each
-															// component (both
-															// shapes and edges)
-															String clickRes = "if(this.getAttribute('value') == 0)"
-																	+ "{"
-																	+ "this.setAttribute('value',1);"
-																	+ "this.setAttribute('opacity','0.3');"
-																	+ "document.getElementById('selectedSVGCmp').value+=this.id+',';"
-																	+ "}"
-																	+ "else{"
-																	+ "this.setAttribute('value',0);"
-																	+ "this.setAttribute('opacity','1');"
-																	+ "var ids = document.getElementById('selectedSVGCmp').value.split(',');"
-																	+ "var tempIDs = ''; "
-																	+ "for(var i=0; i<ids.length-1; i++){"
-																	+ "if(this.id != ids[i]){"
-																	+ "tempIDs+=ids[i]+',';"
-																	+ "}"
-																	+ "}"
-																	+ "document.getElementById('selectedSVGCmp').value = tempIDs;"
-																	+ "}";
-															eComponent
-																	.setAttribute(
-																			"onclick",
-																			clickRes);
-															eComponent
-																	.setAttribute(
-																			"onmouseover",
-																			"this.style.cursor='pointer';");
-															eComponent
-																	.setAttribute(
-																			"value",
-																			"0");
-															eComponent
-																	.setAttribute(
-																			"filter",
-																			"");
-														}
-													}
-												}
-											}
-										}
-									}
-									break;
+						// add new attribute (only for leaf
+						// components)
+						// into each
+						// component (both
+						// shapes and edges)
+						NodeList nComponents = this.getChlidGroup("edge",
+								eSvgChild);
+						for (int m = 0; m < nComponents.getLength(); m++) {
+							Node nComponent = nComponents.item(m);
+							if (nComponent.getNodeType() == Node.ELEMENT_NODE) {
+								Element eComponent = (Element) nComponent;
+								if (eComponent.getNodeName().equals("g")) {
+									eComponent
+											.setAttribute("onclick", clickRes);
+									eComponent.setAttribute("onmouseover",
+											"this.style.cursor='pointer';");
+									eComponent.setAttribute("value", "0");
+									eComponent.setAttribute("filter", "");
 								}
 							}
 						}
-						// }else if(eSvgChild.getNodeName().equals("defs")){
-						// //add shadow reference
-						// Element filter = XMLUtil.createFilterDefs(doc);
-						// eSvgChild.appendChild(filter);
+
+						// for shapes, injects JS code only leaf elements
+						nComponents = this.getChlidGroup("children", eSvgChild);
+						for (int m = 0; m < nComponents.getLength(); m++) {
+							Node nComponent = nComponents.item(m);
+							if (nComponent.getNodeType() == Node.ELEMENT_NODE) {
+								Element eComponent = (Element) nComponent;
+								if (eComponent.getNodeName().equals("g")) {
+									NodeList nSubCmps = this.getChlidGroup(
+											"children", eComponent);
+									this.addJSToLeafNode(nSubCmps, eComponent);
+								}
+							}
+						}
+
+						break;
 					}
 				}
 			}
+			// }else if(eSvgChild.getNodeName().equals("defs")){
+			// //add shadow reference
+			// Element filter = XMLUtil.createFilterDefs(doc);
+			// eSvgChild.appendChild(filter);
 
 			this.setSvgRepresentation(XMLUtil.transformNodeToString(doc
 					.getDocumentElement()));
@@ -1209,7 +1223,7 @@ public class Process {
 
 			// always contain only one process tag
 			NodeList processes = doc.getElementsByTagName("process");
-			for(int index=0; index<processes.getLength(); index++){
+			for (int index = 0; index < processes.getLength(); index++) {
 				Node processXML = processes.item(index);
 				if (processXML != null
 						&& processXML.getNodeType() == Node.ELEMENT_NODE) {
@@ -1220,14 +1234,16 @@ public class Process {
 							Element eActivity = (Element) nActivity;
 							if (ActivityType.contains(eActivity.getNodeName())
 									&& !eActivity.getNodeName().equals(
-											ActivityType.sequenceFlow.toString())) {
+											ActivityType.sequenceFlow
+													.toString())) {
 								Activity activity = new Activity();
 								activity.setId(eActivity.getAttribute("id"));
 								activity.setType(eActivity.getNodeName());
 								activity.setName(eActivity.getAttribute("name"));
 								this.addActivity(activity);
 
-								if ((activity.getType() == ActivityType.task || activity.getType() == ActivityType.subProcess) 
+								if ((activity.getType() == ActivityType.task || activity
+										.getType() == ActivityType.subProcess)
 										&& (activity.getName() == null || activity
 												.getName().equals(""))) {
 									return "Cannot share a process containing unnamed task!";
@@ -1243,7 +1259,7 @@ public class Process {
 					Element eProcessXML = (Element) processXML;
 					NodeList sequences = eProcessXML
 							.getElementsByTagName("sequenceFlow");
-//					System.out.println("length : " + sequences.getLength());
+					// System.out.println("length : " + sequences.getLength());
 					for (int i = 0; i < sequences.getLength(); i++) {
 						Node nActivity = sequences.item(i);
 						if (nActivity.getNodeType() == Node.ELEMENT_NODE) {
@@ -1261,7 +1277,8 @@ public class Process {
 											.getAttribute("targetRef");
 									if (tActivity.getId().equals(sourceRef)) {
 										activity.setSource(tActivity);
-									} else if (tActivity.getId().equals(targetRef)) {
+									} else if (tActivity.getId().equals(
+											targetRef)) {
 										activity.setTarget(tActivity);
 									}
 								}
@@ -1290,7 +1307,7 @@ public class Process {
 			activity.persist(this.processID);
 		}
 	}
-	
+
 	public void persistDir() {
 		Connection db;
 		try {
@@ -1311,13 +1328,13 @@ public class Process {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String getDirFromDB() {
 		Connection db;
 		try {
 			db = BaseGateway.getConnection();
 			ResultSet rs = ProcessDirGateway.findByID(db, this.processID);
-			if(rs.next()){
+			if (rs.next()) {
 				this.setDirectory(rs.getString("dir"));
 			}
 			rs.close();
@@ -1337,7 +1354,7 @@ public class Process {
 		}
 		return this.getDirectory();
 	}
-	
+
 	public void updateDir() {
 		Connection db;
 		try {
@@ -1358,7 +1375,7 @@ public class Process {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void deleteDir() {
 		Connection db;
 		try {
@@ -1379,7 +1396,7 @@ public class Process {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void deleteDirByProcessIDStatic(String processId) {
 		Connection db;
 		try {
@@ -1511,7 +1528,7 @@ public class Process {
 			return false;
 		}
 	}
-	
+
 	public static boolean deletePreviousProcess(String id) {
 		boolean isNewProcess = false;
 		String[] ids = id.split(";");
@@ -1524,13 +1541,14 @@ public class Process {
 		}
 		return isNewProcess;
 	}
-	
+
 	public static boolean deletePreviousQueryProcess(String id) {
 		boolean isNewProcess = false;
 		String[] ids = id.split(";");
 		if (ids.length > 1) {
-			String [] nameFragments = ids[ids.length - 1].split("\\.");
-			String realID = nameFragments[0]+"."+nameFragments[1]+"."+nameFragments[2];
+			String[] nameFragments = ids[ids.length - 1].split("\\.");
+			String realID = nameFragments[0] + "." + nameFragments[1] + "."
+					+ nameFragments[2];
 			Process.deleteByProcessIDStatic(realID);
 			Process.removeNeighborsServiceStatic(realID);
 		} else {
@@ -1538,20 +1556,21 @@ public class Process {
 		}
 		return isNewProcess;
 	}
-	
-	public static JSONObject getAlltasksWithNoOfTimeTheyAreUsed(){
+
+	public static JSONObject getAlltasksWithNoOfTimeTheyAreUsed() {
 		Connection db;
 		JSONObject root = new JSONObject();
 		try {
 			db = BaseGateway.getConnection();
-			ResultSet rs = AB3CCollectionGateway.findAllActivitiesWithNoOfTimes(db);
+			ResultSet rs = AB3CCollectionGateway
+					.findAllActivitiesWithNoOfTimes(db);
 			JSONArray jsons = new JSONArray();
 			while (rs.next()) {
 				JSONObject json = new JSONObject();
-					String name = rs.getString("name");
-					int times = rs.getInt("no_of_times");
-					json.put("taskName", name);
-					json.put("noOfTime", name + " ("+times+")");
+				String name = rs.getString("name");
+				int times = rs.getInt("no_of_times");
+				json.put("taskName", name);
+				json.put("noOfTime", name + " (" + times + ")");
 				jsons.put(json);
 			}
 			root.put("tasks", jsons);

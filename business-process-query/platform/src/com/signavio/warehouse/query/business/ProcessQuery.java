@@ -287,6 +287,8 @@ public class ProcessQuery extends Process{
 					queryJSON.put("desc", query.getQueryDesc());
 					queryJSON.put("queryNo", query.getQueryNo());
 					queryJSON.put("isInitiated", query.isInitiated());
+					queryJSON.put("icon", "../editor/images/script.png");
+					queryJSON.put("cls", "QueryEntree");
 					queriesJSON.put(queryJSON);
 //				}
 			}

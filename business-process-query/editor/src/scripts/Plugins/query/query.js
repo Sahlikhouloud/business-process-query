@@ -117,8 +117,10 @@ ORYX.Plugins.Query = Clazz.extend({
 			
 			// Create form
 			var methods = [
-			                [2, 'Levenstein']
-			               ,[4, 'Improved weight']
+			               	[1, 'Levenstein'], 
+			                [2, 'Levenstein (zone weight)'],
+			                [3, 'Sim. between gateways'],
+			                [4, 'Sim. between gateways (zone weight)']
 			           ];
 			var formPanel = new Ext.form.FormPanel({
 				id		: 'query_model',

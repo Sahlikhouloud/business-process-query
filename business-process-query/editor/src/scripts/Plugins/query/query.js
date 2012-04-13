@@ -137,7 +137,7 @@ ORYX.Plugins.Query = Clazz.extend({
 	   					        data:eval(taskTxt)
 	   					    })
 	                     	,allowBlank:false
-	                     	,autoWidth:true
+	                     	,width:250
 	                     	,emptyText: '-- select --'
 	   					    ,valueField:'myId'
 						    ,displayField:'myText'
@@ -202,6 +202,7 @@ ORYX.Plugins.Query = Clazz.extend({
 	   					        data:[]
 	   					    })
 	                     	,allowBlank:false
+	                     	,width:250
 	                     	,emptyText: '-- select --'
 	   					    ,valueField:'myId'
 	 					    ,displayField:'myText'
@@ -217,6 +218,7 @@ ORYX.Plugins.Query = Clazz.extend({
 	   					        data:methods
 	   					    })
 	                      	,allowBlank:false
+	                      	,width:250
 	                      	,emptyText: '-- select --'
 	   					    ,valueField:'myId'
 	   					    ,displayField:'myText'

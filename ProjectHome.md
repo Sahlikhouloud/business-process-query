@@ -1,0 +1,1 @@
+This is the Master thesis project about querying business process represented as BPMN. The main purpose of our approach is to aid process designer to create business process in easier way. This tool is developed based on signavio core component which is open source project for academic purposes.
